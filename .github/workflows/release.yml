@@ -17,7 +17,11 @@ jobs:
         with:
           enable-cache: true
       - name: build dist
+        run: uv sync --group bundle
+      - name: build dist
         run: uv build
+      - name: build binary
+        run: uv run pyinstaller scim2.spec
       - uses: actions/upload-artifact@v4
         with:
           name: artifacts
@@ -28,8 +32,14 @@ jobs:
     name: create Github release
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: artifacts
+          path: dist
       - uses: softprops/action-gh-release@v2
-
+        with:
+          files: |
+            dist/scim2
   publish:
     name: release to pypi
     needs: build

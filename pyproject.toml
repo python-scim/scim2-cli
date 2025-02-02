@@ -30,7 +30,7 @@ dependencies = [
     "scim2-client>=0.4.3",
     "scim2-tester[httpx]>=0.1.10",
     "sphinx-click-rst-to-ansi-formatter>=0.1.0",
-    "pydanclick>=0.3.0",
+    "pydanclick>=0.4.0",
     "pygments>=2.18.0",
 ]
 

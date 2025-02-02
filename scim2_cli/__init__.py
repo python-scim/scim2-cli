@@ -1,11 +1,8 @@
 import json
 import re
-from typing import Any
-from typing import TypeGuard
 
 import click
 from httpx import Client
-from pydantic import BaseModel
 from scim2_client import SCIMClientError
 from scim2_client.engines.httpx import SyncSCIMClient
 from scim2_models import Group
@@ -27,24 +24,6 @@ from scim2_cli.utils import DOC_URL
 from scim2_cli.utils import HeaderType
 from scim2_cli.utils import exception_to_click_error
 from scim2_cli.utils import split_headers
-
-
-# monkeypatching pydanclick until this patch is released
-# https://github.com/felix-martel/pydanclick/pull/25
-def patch_pydanclick():
-    def _is_pydantic_model(model: Any) -> TypeGuard[type[BaseModel]]:
-        """Return True if `model` is a Pydantic `BaseModel` class."""
-        try:
-            return issubclass(model, BaseModel)
-        except TypeError:
-            return False
-
-    import pydanclick.model.field_collection
-
-    pydanclick.model.field_collection._is_pydantic_model = _is_pydantic_model
-
-
-patch_pydanclick()
 
 
 def load_config_files(

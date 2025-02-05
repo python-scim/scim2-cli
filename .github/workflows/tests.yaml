@@ -65,3 +65,13 @@ jobs:
       - name: Install dependencies
         run: uv sync --group doc
       - run: uv run sphinx-build doc build/sphinx/html
+
+  nix:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: cachix/install-nix-action@v27
+      with:
+        github_access_token: ${{ secrets.GITHUB_TOKEN }}
+    - run: nix build
+    - run: nix flake check

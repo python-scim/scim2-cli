@@ -1,6 +1,13 @@
 Changelog
 =========
 
+[0.2.3] - Unreleased
+--------------------
+
+Added
+^^^^^
+- Add the ``--no-verify`` parameter to skip certificate verifications. :issue:`20`
+
 [0.2.2] - 2024-12-06
 --------------------
 

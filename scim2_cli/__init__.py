@@ -77,6 +77,12 @@ def load_config_files(
     envvar="SCIM_CLI_HEADERS",
 )
 @click.option(
+    "--no-verify",
+    is_flag=True,
+    default=False,
+    help="Don't perform https certificate verifications.",
+)
+@click.option(
     "-s",
     "--schemas",
     type=click.File(),
@@ -99,7 +105,13 @@ def load_config_files(
 )
 @click.pass_context
 def cli(
-    ctx, url: str, header: list[str], schemas, resource_types, service_provider_config
+    ctx,
+    url: str,
+    header: list[str],
+    no_verify,
+    schemas,
+    resource_types,
+    service_provider_config,
 ):
     """SCIM application development CLI."""
     ctx.ensure_object(dict)
@@ -108,7 +120,7 @@ def cli(
         raise click.ClickException("No SCIM server URL defined.")
 
     headers_dict = split_headers(header)
-    client = Client(base_url=url, headers=headers_dict)
+    client = Client(base_url=url, headers=headers_dict, verify=not no_verify)
 
     resource_models, resource_types_obj, spc_obj = load_config_files(
         schemas, resource_types, service_provider_config

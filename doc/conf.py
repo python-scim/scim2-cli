@@ -61,6 +61,14 @@ html_theme_options = {
             "url": "https://scim2-client.readthedocs.io",
         },
         {"title": "scim2-tester", "url": "https://scim2-tester.readthedocs.io"},
+        {
+            "title": "scim2-server",
+            "url": "https://github.com/python-scim/scim2-server",
+        },
+        {
+            "title": "pytest-scim2-server",
+            "url": "https://github.com/pytest-dev/pytest-scim2-server",
+        },
     ],
 }
 

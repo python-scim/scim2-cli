@@ -64,6 +64,9 @@ bundle = [
 scim = "scim2_cli:cli"
 scim2 = "scim2_cli:cli"
 
+[tool.uv.build-backend]
+module-root = ""
+
 [tool.coverage.run]
 source = [
     "scim2_cli",

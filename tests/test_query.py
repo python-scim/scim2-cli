@@ -97,7 +97,7 @@ def test_all(runner, httpserver, simple_user_payload):
         ],
         catch_exceptions=False,
     )
-    assert result.exit_code == 0, result.stdout
+    assert result.exit_code == 0, result.output
 
     json_output = json.loads(result.output)
     assert json_output == {
@@ -139,7 +139,7 @@ def test_get_by_id(runner, httpserver, simple_user_payload):
         ],
         catch_exceptions=False,
     )
-    assert result.exit_code == 0, result.stdout
+    assert result.exit_code == 0, result.output
 
     json_output = json.loads(result.output)
     assert json_output == simple_user_payload("one-by-id")
@@ -157,7 +157,7 @@ def test_get_resources_without_id(runner, httpserver, simple_user_payload):
         ],
         catch_exceptions=False,
     )
-    assert result.exit_code == 0, result.stdout
+    assert result.exit_code == 0, result.output
 
     json_output = json.loads(result.output)
     assert json_output == {
@@ -178,7 +178,7 @@ def test_stdin(runner, httpserver, simple_user_payload):
         input=json.dumps(payload),
         catch_exceptions=False,
     )
-    assert result.exit_code == 0, result.stdout
+    assert result.exit_code == 0, result.output
 
     json_output = json.loads(result.output)
     assert json_output == simple_user_payload("user-name-qs")
@@ -211,7 +211,7 @@ def test_search_request_payload(runner, httpserver, simple_user_payload):
         ],
         catch_exceptions=False,
     )
-    assert result.exit_code == 0, result.stdout
+    assert result.exit_code == 0, result.output
 
     json_output = json.loads(result.output)
     assert json_output == simple_user_payload("full-qs")
@@ -233,8 +233,8 @@ def test_unknown_resource_type(
         ],
         catch_exceptions=False,
     )
-    assert result.exit_code == 1, result.stdout
-    assert "Unknown resource type 'invalid. Available values are:" in result.stdout
+    assert result.exit_code == 1, result.output
+    assert "Unknown resource type 'invalid. Available values are:" in result.output
 
 
 def test_scimclient_error(runner, httpserver, simple_user_payload):
@@ -250,8 +250,8 @@ def test_scimclient_error(runner, httpserver, simple_user_payload):
         ],
         catch_exceptions=False,
     )
-    assert result.exit_code == 1, result.stdout
-    assert "Unexpected response status code: 999" in result.stdout
+    assert result.exit_code == 1, result.output
+    assert "Unexpected response status code: 999" in result.output
 
 
 def test_validation_error(runner, httpserver, simple_user_payload):
@@ -267,5 +267,5 @@ def test_validation_error(runner, httpserver, simple_user_payload):
         ],
         catch_exceptions=False,
     )
-    assert result.exit_code == 1, result.stdout
-    assert "Expected type User but got undefined object with no schema" in result.stdout
+    assert result.exit_code == 1, result.output
+    assert "Expected type User but got undefined object with no schema" in result.output

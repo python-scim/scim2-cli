@@ -10,8 +10,8 @@ def test_no_command(runner, httpserver):
         ["--url", httpserver.url_for("/"), "create"],
         catch_exceptions=False,
     )
-    assert result.exit_code == 1, result.stdout
-    assert "create user --help" in result.stdout
+    assert result.exit_code == 1, result.output
+    assert "create user --help" in result.output
 
 
 def test_invalid_command(runner, httpserver):
@@ -21,8 +21,8 @@ def test_invalid_command(runner, httpserver):
         ["--url", httpserver.url_for("/"), "create", "invalid"],
         catch_exceptions=False,
     )
-    assert result.exit_code == 1, result.stdout
-    assert "Error: Invalid model" in result.stdout
+    assert result.exit_code == 1, result.output
+    assert "Error: Invalid model" in result.output
 
 
 def test_no_command_stdin(runner, httpserver, simple_user_payload):
@@ -47,7 +47,7 @@ def test_no_command_stdin(runner, httpserver, simple_user_payload):
         input=json.dumps(payload),
         catch_exceptions=False,
     )
-    assert result.exit_code == 0, result.stdout
+    assert result.exit_code == 0, result.output
     json_output = json.loads(result.output)
 
     assert json_output == response_payload
@@ -60,8 +60,8 @@ def test_no_command_no_stdin(runner, httpserver, simple_user_payload):
         ["--url", httpserver.url_for("/"), "create"],
         catch_exceptions=False,
     )
-    assert result.exit_code == 1, result.stdout
-    assert "Usage: cli create" in result.stdout
+    assert result.exit_code == 1, result.output
+    assert "Usage: cli create" in result.output
 
 
 def test_no_command_scimclient_error(runner, httpserver, simple_user_payload):
@@ -92,8 +92,8 @@ def test_no_command_scimclient_error(runner, httpserver, simple_user_payload):
         input=json.dumps(payload),
         catch_exceptions=False,
     )
-    assert result.exit_code == 1, result.stdout
-    assert "Unexpected response status code: 999" in result.stdout
+    assert result.exit_code == 1, result.output
+    assert "Unexpected response status code: 999" in result.output
 
 
 def test_no_command_validation_error(runner, httpserver, simple_user_payload):
@@ -124,8 +124,8 @@ def test_no_command_validation_error(runner, httpserver, simple_user_payload):
         catch_exceptions=False,
         input=json.dumps(payload),
     )
-    assert result.exit_code == 1, result.stdout
-    assert "Expected type User but got undefined object with no schema" in result.stdout
+    assert result.exit_code == 1, result.output
+    assert "Expected type User but got undefined object with no schema" in result.output
 
 
 def test_command_stdin(runner, httpserver, simple_user_payload):
@@ -150,7 +150,7 @@ def test_command_stdin(runner, httpserver, simple_user_payload):
         input=json.dumps(payload),
         catch_exceptions=False,
     )
-    assert result.exit_code == 0, result.stdout
+    assert result.exit_code == 0, result.output
     json_output = json.loads(result.output)
 
     assert json_output == response_payload
@@ -177,7 +177,7 @@ def test_command_parameters(runner, httpserver, simple_user_payload):
         ],
         catch_exceptions=False,
     )
-    assert result.exit_code == 0, result.stdout
+    assert result.exit_code == 0, result.output
     json_output = json.loads(result.output)
 
     assert json_output == response_payload
@@ -190,8 +190,8 @@ def test_command_no_stdin_no_parameters(runner, httpserver, simple_user_payload)
         ["--url", httpserver.url_for("/"), "create", "user"],
         catch_exceptions=False,
     )
-    assert result.exit_code == 1, result.stdout
-    assert "Usage: cli create" in result.stdout
+    assert result.exit_code == 1, result.output
+    assert "Usage: cli create" in result.output
 
 
 def test_command_validation_error(runner, httpserver, simple_user_payload):
@@ -217,5 +217,5 @@ def test_command_validation_error(runner, httpserver, simple_user_payload):
         ],
         catch_exceptions=False,
     )
-    assert result.exit_code == 1, result.stdout
-    assert "Expected type User but got undefined object with no schema" in result.stdout
+    assert result.exit_code == 1, result.output
+    assert "Expected type User but got undefined object with no schema" in result.output

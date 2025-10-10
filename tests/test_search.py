@@ -42,7 +42,7 @@ def test_stdin(runner, httpserver, simple_user_payload):
         input=json.dumps(payload),
         catch_exceptions=False,
     )
-    assert result.exit_code == 0, result.stdout
+    assert result.exit_code == 0, result.output
 
     json_output = json.loads(result.output)
     assert json_output == {
@@ -79,7 +79,7 @@ def test_search_request_payload(runner, httpserver, simple_user_payload):
         ],
         catch_exceptions=False,
     )
-    assert result.exit_code == 0, result.stdout
+    assert result.exit_code == 0, result.output
 
     json_output = json.loads(result.output)
     assert json_output == {
@@ -104,5 +104,5 @@ def test_scimclient_error(runner, httpserver, simple_user_payload):
         ],
         catch_exceptions=False,
     )
-    assert result.exit_code == 1, result.stdout
-    assert "Unexpected response status code: 666" in result.stdout
+    assert result.exit_code == 1, result.output
+    assert "Unexpected response status code: 666" in result.output

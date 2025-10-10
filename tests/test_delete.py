@@ -25,7 +25,7 @@ def test_nominal_case(runner, httpserver):
         ],
         catch_exceptions=False,
     )
-    assert result.exit_code == 0, result.stdout
+    assert result.exit_code == 0, result.output
 
 
 def test_scimclient_error(runner, httpserver):
@@ -50,8 +50,8 @@ def test_scimclient_error(runner, httpserver):
         ],
         catch_exceptions=False,
     )
-    assert result.exit_code == 1, result.stdout
-    assert "Unexpected response status code: 999" in result.stdout
+    assert result.exit_code == 1, result.output
+    assert "Unexpected response status code: 999" in result.output
 
 
 def test_bad_resource_type(runner, httpserver):
@@ -67,8 +67,8 @@ def test_bad_resource_type(runner, httpserver):
         ],
         catch_exceptions=False,
     )
-    assert result.exit_code == 1, result.stdout
-    assert "Unknown resource type 'invalid'." in result.stdout
+    assert result.exit_code == 1, result.output
+    assert "Unknown resource type 'invalid'." in result.output
 
 
 def test_not_found(runner, httpserver):
@@ -97,7 +97,7 @@ def test_not_found(runner, httpserver):
         ],
         catch_exceptions=False,
     )
-    assert result.exit_code == 0, result.stdout
+    assert result.exit_code == 0, result.output
     json_output = json.loads(result.output)
     assert json_output == {
         "schemas": ["urn:ietf:params:scim:api:messages:2.0:Error"],

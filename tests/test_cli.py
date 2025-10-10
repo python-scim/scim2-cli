@@ -46,7 +46,7 @@ def test_stdin_bad_json(runner, httpserver):
         catch_exceptions=False,
     )
     assert result.exit_code == 1
-    assert "Invalid JSON input." in result.stdout
+    assert "Invalid JSON input." in result.output
 
 
 def test_auth_headers(runner, httpserver, simple_user_payload):

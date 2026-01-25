@@ -100,11 +100,13 @@ def is_field_acceptable(context, model, field_name) -> bool:
 
 
 def unacceptable_fields(context, model):
-    return [
+    excluded = [
         field_name
         for field_name in model.model_fields
         if not is_field_acceptable(context, model, field_name)
     ]
+    excluded.append("schemas")
+    return excluded
 
 
 def exception_to_click_error(exception):

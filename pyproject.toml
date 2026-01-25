@@ -17,6 +17,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: Implementation :: CPython",
     "License :: OSI Approved :: Apache Software License",
     "Environment :: Web Environment",
@@ -27,8 +28,8 @@ classifiers = [
 requires-python = ">= 3.10"
 dependencies = [
     "click>=8.1.7",
-    "scim2-client>=0.4.3",
-    "scim2-tester[httpx]>=0.2.0",
+    "scim2-client>=0.7.1",
+    "scim2-tester[httpx]>=0.2.5",
     "sphinx-click-rst-to-ansi-formatter>=0.1.0",
     "pydanclick>=0.4.0",
     "pygments>=2.18.0",
@@ -127,6 +128,7 @@ env_list = [
     "py311",
     "py312",
     "py313",
+    "py314",
     "minversions",
     "doc",
     "coverage",

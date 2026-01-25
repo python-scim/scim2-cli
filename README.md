@@ -9,6 +9,17 @@ Provisioning is the action of managing a set of resources across different servi
 SCIM is often used between Identity Providers and applications in completion of standards like OAuth2 and OpenID Connect.
 It allows users and groups creations, modifications and deletions to be synchronized between applications.
 
+## Features
+
+- **CRUD Commands**: `create`, `query`, `replace` and `delete` resources from the command line
+- **Search Command**: Query resources using SCIM filters, sorting and pagination
+- **Compliance Testing**: Built-in `test` command using [scim2-tester](https://scim2-tester.readthedocs.io) to validate server RFC compliance
+- **Server Discovery**: Automatic retrieval of server schemas and resource types
+- **Dynamic CLI Options**: Command options generated from server schemas
+- **Flexible Input**: Pass attributes as CLI options or pipe JSON payloads via stdin
+- **JSON Output**: Formatted JSON responses with optional indentation control
+- **Authentication**: Custom HTTP headers support for Bearer tokens and other auth methods
+
 ## Installation
 
 ### Binary files

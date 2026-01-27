@@ -17,7 +17,10 @@ extensions = [
     "sphinx.ext.todo",
     "sphinx.ext.viewcode",
     "sphinx_click",
+    "sphinx_design",
+    "sphinx_iconify",
     "sphinx_issues",
+    "sphinx_substitution_extensions",
 ]
 
 templates_path = ["_templates"]
@@ -34,6 +37,11 @@ source_suffix = {
 
 version = metadata.version("scim2_cli")
 language = "en"
+
+rst_prolog = f"""
+.. |version| replace:: {version}
+"""
+
 pygments_style = "sphinx"
 todo_include_todos = True
 toctree_collapse = False

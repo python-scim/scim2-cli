@@ -22,42 +22,11 @@ It allows users and groups creations, modifications and deletions to be synchron
 
 ## Installation
 
-### Binary files
-
-Binary files are available on the [releases page](https://github.com/python-scim/scim2-cli/releases).
-
-### Python package
-
-scim2-cli is published on the [PyPI repository](https://pypi.org/project/scim2-cli).
-You can install it with your favourite python package manager.
-
-```shell
-pip install scim2-cli
+```console
+$ curl -LsSf uvx.sh/scim2-cli/install.sh | sh
 ```
 
-### From sources
-
-To run scim2-cli from the sources, [uv is needed](https://docs.astral.sh/uv/getting-started/installation/) for development:
-
-```shell
-git clone https://github.com/python-scim/scim2-cli.git
-cd scim2-cli
-uv sync
-```
-
-Then, it can be launched directly as a Python script:
-
-```shell
-uv run scim2 --help
-```
-
-Or you can build a single file binary from the sources:
-
-```shell
-uv sync --group bundle
-uv run pyinstaller --name scim2 --onefile scim2_cli/__init__.py
-./dist/scim2 --help
-```
+Check the [installation documentation](https://scim2-cli.readthedocs.io/en/latest/installation.html) for other methods.
 
 ## Usage
 
@@ -65,7 +34,7 @@ Check the [reference](https://scim2-cli.readthedocs.io/en/latest/reference.html)
 
 Here is an example of resource creation:
 
-```shell
+```console
 $ scim2 --url https://auth.example --header "Authorization: Bearer 12345" create user --user-name "bjensen@example.com"
 {
     "schemas": ["urn:ietf:params:scim:schemas:core:2.0:User"],
@@ -83,7 +52,7 @@ $ scim2 --url https://auth.example --header "Authorization: Bearer 12345" create
 
 Here is an example of resource query:
 
-```shell
+```console
 $ scim2 --url https://auth.example --header "Authorization: Bearer 12345" query user 2819c223-7f76-453a-919d-413861904646
 {
     "schemas": ["urn:ietf:params:scim:schemas:core:2.0:User"],

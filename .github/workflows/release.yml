@@ -22,6 +22,8 @@ jobs:
         run: uv build
       - name: build binary
         run: uv run pyinstaller scim2.spec
+      - name: rename binary
+        run: mv dist/scim2 dist/scim2-linux
       - uses: actions/upload-artifact@v4
         with:
           name: artifacts
@@ -39,7 +41,7 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/scim2
+            dist/scim2-linux
   publish:
     name: release to pypi
     needs: build

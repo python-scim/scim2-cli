@@ -91,5 +91,5 @@ Installation
       .. code-block:: console
 
          $ uv sync --group bundle
-         $ uv run pyinstaller --name scim2 --onefile scim2_cli/__init__.py
+         $ uv run pyinstaller scim2.spec
          $ ./dist/scim2 --help

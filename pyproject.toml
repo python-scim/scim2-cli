@@ -166,3 +166,11 @@ commands = [
     ["pytest", "--cov", "--cov-fail-under=100", "--cov-report", "term:skip-covered", "{posargs}"],
     ["coverage", "html"],
 ]
+
+[tool.tox.env.bundle]
+dependency_groups = ["bundle"]
+allowlist_externals = ["./dist/scim2"]
+commands = [
+    ["pyinstaller", "--clean", "--log-level", "WARN", "scim2.spec"],
+    ["./dist/scim2", "--help"],
+]

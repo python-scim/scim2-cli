@@ -66,7 +66,7 @@ which resource schemas are available, and where they are located.
 
 By default the CLI will automatically discover those resources on the server, before each command is run.
 
-However you might find too time consuming to achieve all those network requests.
+However, automatic discovery can be slow due to multiple network requests.
 You can store those data locally and reuse them for future command runs thanks to the
 :option:`--schemas <scim --schemas>`, :option:`--resource-types <scim --resource-types>` and :option:`--service-provider-config <scim --service-provider-config>` (and their corresponding environment vars :ref:`SCIM_CLI_SCHEMAS <scim-schemas-scim_cli_schemas>`, :ref:`SCIM_CLI_RESOURCE_TYPES <scim-resource_types-scim_cli_resource_types>` and :ref:`SCIM_CLI_SERVICE_PROVIDER_CONFIG <scim-service_provider_config-scim_cli_service_provider_config>`)
 
@@ -88,8 +88,8 @@ You can store those data locally and reuse them for future command runs thanks t
 Query and search resources
 --------------------------
 
-The :ref:`query` and :ref:`search` commands can be used to look for resources.
-:ref:`query` performs ag `GET` request on the resources endpoint, while :ref:`search` performs a `POST` request on the ``/.search`` endpoint.
+Use the :ref:`query` and :ref:`search` commands to look for resources.
+:ref:`query` performs a `GET` request on the resources endpoint, while :ref:`search` performs a `POST` request on the ``/.search`` endpoint.
 Both commands take similar options such as :option:`--count <scim-query.--count>` or :option:`--attributes <scim-query.--attributes>`.
 An exhaustive list of options can be found on the :doc:`reference`.
 :ref:`query` can also take a :option:`RESOURCE_TYPE <scim-query.RESOURCE_TYPE>` and a :option:`ID <scim-query.ID>` parameters.
@@ -149,7 +149,7 @@ An exhaustive list of options can be found on the :doc:`reference`.
 Create and replace resources
 ----------------------------
 
-The :ref:`create` and :ref:`replace` commands can be used to edit resources.
+Use the :ref:`create` and :ref:`replace` commands to edit resources.
 
 Options for those commands are dynamically generated, depending on the resource attributes available on the server.
 For instance, for the :class:`~scim2_models.User` resource, you have a ``--user-name`` option.
@@ -209,7 +209,7 @@ JSON input
 ----------
 
 scim2-cli will also read input data from the standard input.
-This can be used to send custom payloads to the SCIM server.
+Use this to send custom payloads to the SCIM server.
 
 When user with :ref:`query` and :ref:`search`, the input value must be a JSON representation of a :class:`~scim2_models.SearchRequest` object:
 

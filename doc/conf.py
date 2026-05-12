@@ -3,6 +3,11 @@ import os
 import sys
 from importlib import metadata
 
+from docutils import nodes
+from sphinx_iconify.roles import depart_iconify_icon_html
+from sphinx_iconify.roles import iconify_icon
+from sphinx_iconify.roles import visit_iconify_icon_html
+
 sys.path.insert(0, os.path.abspath(".."))
 sys.path.insert(0, os.path.abspath("../scim2_cli"))
 
@@ -102,3 +107,16 @@ texinfo_documents = [
 # -- Options for sphinx-issues -------------------------------------
 
 issues_github_path = "python-scim/scim2-cli"
+
+
+def _visit_iconify_skip(self, node):
+    raise nodes.SkipNode
+
+
+def setup(app):
+    app.add_node(
+        iconify_icon,
+        override=True,
+        html=(visit_iconify_icon_html, depart_iconify_icon_html),
+        man=(_visit_iconify_skip, None),
+    )

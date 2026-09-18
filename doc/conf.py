@@ -60,8 +60,8 @@ intersphinx_mapping = {
 
 # -- Sibling projects ------------------------------------------------------
 
-# Kept identical in the scim2-models, scim2-client, scim2-cli and scim2-tester
-# documentations, so that any divergence shows up in a diff.
+# Kept identical in every python-scim documentation, so that any divergence
+# shows up in a diff.
 NAV_LINKS = [
     {
         "title": "Libraries",

@@ -32,8 +32,8 @@ def test_cli(ctx, verbose, check_status_code, check_content_type):
          test
     """
     client = ctx.obj["client"]
-    client.check_status_code = check_status_code
-    client.check_content_type = check_content_type
+    client.check_response_status_codes = check_status_code
+    client.check_response_content_type = check_content_type
     results = check_server(client)
     click.echo(f"Performing a SCIM compliance check on {client.client.base_url} ...")
     success = True

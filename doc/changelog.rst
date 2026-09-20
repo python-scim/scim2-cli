@@ -1,6 +1,27 @@
 Changelog
 =========
 
+[Unreleased]
+------------
+
+Changed
+^^^^^^^
+- scim2-client 0.8.0 and scim2-tester 0.3.0 are now the minimum supported versions.
+- Requests are performed with `httpx2 <https://github.com/pydantic/httpx2>`_ instead of
+  httpx, following the scim2-client 0.8 engine rename.
+- :ref:`query` only sends the ``attributes`` and ``excludedAttributes`` parameters when a
+  single resource is queried, as :rfc:`RFC7644 §3.4.1 <7644#section-3.4.1>` defines those
+  as the sole parameters of that request. ``--start-index``, ``--count``, ``--filter``,
+  ``--sort-by`` and ``--sort-order`` are refused in that case, instead of being sent along.
+
+Fixed
+^^^^^
+- Server SCIM errors and invalid request payloads are reported as readable messages
+  instead of a traceback. scim2-client 0.8 raises the scim2-models exceptions for those,
+  which do not belong to its own exception hierarchy.
+- The :ref:`test` ``--dont-check-status-code`` and ``--dont-check-content-type`` options
+  were not applied on the client.
+
 [0.2.4] - 2026-01-25
 --------------------
 

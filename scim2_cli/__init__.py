@@ -2,9 +2,8 @@ import json
 import re
 
 import click
-from httpx import Client
-from scim2_client import SCIMClientError
-from scim2_client.engines.httpx import SyncSCIMClient
+from httpx2 import Client
+from scim2_client.engines.httpx2 import SyncSCIMClient
 from scim2_models import Group
 from scim2_models import ListResponse
 from scim2_models import Resource
@@ -21,6 +20,7 @@ from scim2_cli.replace import replace_cli
 from scim2_cli.search import search_cli
 from scim2_cli.test import test_cli
 from scim2_cli.utils import DOC_URL
+from scim2_cli.utils import SCIM_EXCEPTIONS
 from scim2_cli.utils import HeaderType
 from scim2_cli.utils import exception_to_click_error
 from scim2_cli.utils import split_headers
@@ -138,7 +138,7 @@ def cli(
             resource_types=not bool(resource_types),
             service_provider_config=not bool(service_provider_config),
         )
-    except SCIMClientError as exc:
+    except SCIM_EXCEPTIONS as exc:
         raise exception_to_click_error(exc) from exc
 
     ctx.obj["client"] = scim_client

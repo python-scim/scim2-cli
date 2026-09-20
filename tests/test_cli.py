@@ -5,6 +5,7 @@ import pytest
 from scim2_models import AuthenticationScheme
 from scim2_models import Bulk
 from scim2_models import ChangePassword
+from scim2_models import Error
 from scim2_models import ETag
 from scim2_models import Filter
 from scim2_models import ListResponse
@@ -325,3 +326,21 @@ def test_custom_configuration_by_env(
         del os.environ["SCIM_CLI_SERVICE_PROVIDER_CONFIG"]
         del os.environ["SCIM_CLI_SCHEMAS"]
         del os.environ["SCIM_CLI_RESOURCE_TYPES"]
+
+
+def test_discovery_scim_error(runner, httpserver):
+    """Test that the discovery step displays a readable error when the server answers a SCIM error."""
+    httpserver.clear_all_handlers()
+    httpserver.expect_request("/ResourceTypes").respond_with_json(
+        Error(status=403, detail="Insufficient permissions").model_dump(),
+        status=403,
+        content_type="application/scim+json",
+    )
+
+    result = runner.invoke(
+        cli,
+        ["--url", httpserver.url_for("/"), "query"],
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 1, result.output
+    assert "Error: Insufficient permissions" in result.output

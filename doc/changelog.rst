@@ -1,6 +1,14 @@
 Changelog
 =========
 
+[Unreleased]
+------------
+
+Fixed
+^^^^^
+- The :ref:`test` ``--dont-check-status-code`` and ``--dont-check-content-type`` options
+  were not applied on the client.
+
 [0.2.4] - 2026-01-25
 --------------------
 

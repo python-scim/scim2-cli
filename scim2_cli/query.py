@@ -1,6 +1,7 @@
 import click
 from click import ClickException
 from scim2_models import ResourceType
+from scim2_models import ResponseParameters
 from scim2_models import Schema
 from scim2_models import SearchRequest
 from scim2_models import ServiceProviderConfig
@@ -73,6 +74,9 @@ def query_cli(
     - If :code:`RESOURCE_TYPE` is :code:`user` and :code:`id` is not set, then the request will made on the :code:`/Users` endpoint.
     - If :code:`RESOURCE_TYPE` is not set, then the request will made on the :code:`/` endpoint.
 
+    When a single resource is queried, only :code:`--attribute` and :code:`--excluded-attribute` are
+    available, as defined in `RFC7644 §3.4.1 <https://www.rfc-editor.org/rfc/rfc7644#section-3.4.1>`_.
+
     Data passed in JSON format to stdin is sent as request arguments and all the other query arguments are ignored:
 
     .. code-block:: bash
@@ -92,9 +96,34 @@ def query_cli(
                 f"Unknown resource type '{resource_type}. Available values are: {ok_values}'"
             ) from exc
 
+    # ServiceProviderConfig is a singleton endpoint, so it is reached without an id.
+    single_resource = bool(id) or resource_type is ServiceProviderConfig
+    listing_options = [
+        name
+        for name, value in (
+            ("--start-index", start_index),
+            ("--count", count),
+            ("--filter", filter),
+            ("--sort-by", sort_by),
+            ("--sort-order", sort_order),
+        )
+        if value is not None
+    ]
+    if single_resource and listing_options:
+        raise ClickException(
+            f"{', '.join(listing_options)} cannot be used when querying a single resource."
+        )
+
     if ctx.obj.get("stdin"):
         check_request_payload = False
         payload = ctx.obj.get("stdin")
+
+    elif single_resource:
+        check_request_payload = True
+        payload = ResponseParameters(
+            attributes=attribute,
+            excluded_attributes=excluded_attribute,
+        )
 
     else:
         check_request_payload = True

@@ -9,6 +9,10 @@ Changed
 - scim2-client 0.8.0 and scim2-tester 0.3.0 are now the minimum supported versions.
 - Requests are performed with `httpx2 <https://github.com/pydantic/httpx2>`_ instead of
   httpx, following the scim2-client 0.8 engine rename.
+- :ref:`query` only sends the ``attributes`` and ``excludedAttributes`` parameters when a
+  single resource is queried, as :rfc:`RFC7644 §3.4.1 <7644#section-3.4.1>` defines those
+  as the sole parameters of that request. ``--start-index``, ``--count``, ``--filter``,
+  ``--sort-by`` and ``--sort-order`` are refused in that case, instead of being sent along.
 
 Fixed
 ^^^^^

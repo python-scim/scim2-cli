@@ -24,6 +24,22 @@ def httpserver(httpserver, simple_user_payload):
 
     httpserver.expect_request(
         "/Users",
+        query_string="attributes=userName&attributes=displayName&filter=userName+Eq+%22john%22&sortBy=userName&sortOrder=ascending&startIndex=1&count=10",
+        method="GET",
+    ).respond_with_json(
+        {
+            "totalResults": 1,
+            "itemsPerPage": 10,
+            "startIndex": 1,
+            "schemas": ["urn:ietf:params:scim:api:messages:2.0:ListResponse"],
+            "Resources": [simple_user_payload("full-qs")],
+        },
+        status=200,
+        content_type="application/scim+json",
+    )
+
+    httpserver.expect_request(
+        "/Users",
         method="GET",
     ).respond_with_json(
         {
@@ -52,16 +68,6 @@ def httpserver(httpserver, simple_user_payload):
         method="GET",
     ).respond_with_json(
         simple_user_payload("user-name-qs"),
-        status=200,
-        content_type="application/scim+json",
-    )
-
-    httpserver.expect_request(
-        "/Users/full-qs",
-        query_string="attributes=userName&attributes=displayName&filter=userName+Eq+%22john%22&sortBy=userName&sortOrder=ascending&startIndex=1&count=10",
-        method="GET",
-    ).respond_with_json(
-        simple_user_payload("full-qs"),
         status=200,
         content_type="application/scim+json",
     )
@@ -185,7 +191,7 @@ def test_stdin(runner, httpserver, simple_user_payload):
 
 
 def test_search_request_payload(runner, httpserver, simple_user_payload):
-    """Test that most of the arguments are passed in the payload."""
+    """Test that most of the arguments are passed in the payload when listing resources."""
     result = runner.invoke(
         cli,
         [
@@ -193,7 +199,6 @@ def test_search_request_payload(runner, httpserver, simple_user_payload):
             httpserver.url_for("/"),
             "query",
             "user",
-            "full-qs",
             "--attribute",
             "userName",
             "--attribute",
@@ -214,7 +219,52 @@ def test_search_request_payload(runner, httpserver, simple_user_payload):
     assert result.exit_code == 0, result.output
 
     json_output = json.loads(result.output)
-    assert json_output == simple_user_payload("full-qs")
+    assert json_output["Resources"] == [simple_user_payload("full-qs")]
+
+
+def test_listing_options_on_a_single_resource(runner, httpserver):
+    """Test that the listing arguments are refused when an id is passed."""
+    result = runner.invoke(
+        cli,
+        [
+            "--url",
+            httpserver.url_for("/"),
+            "query",
+            "user",
+            "one-by-id",
+            "--filter",
+            'userName Eq "john"',
+            "--count",
+            "10",
+        ],
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 1, result.output
+    assert (
+        "Error: --count, --filter cannot be used when querying a single resource."
+        in result.output
+    )
+
+
+def test_listing_options_on_the_service_provider_config(runner, httpserver):
+    """Test that the listing arguments are refused on the ServiceProviderConfig endpoint."""
+    result = runner.invoke(
+        cli,
+        [
+            "--url",
+            httpserver.url_for("/"),
+            "query",
+            "serviceproviderconfig",
+            "--filter",
+            'userName Eq "john"',
+        ],
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 1, result.output
+    assert (
+        "Error: --filter cannot be used when querying a single resource."
+        in result.output
+    )
 
 
 def test_unknown_resource_type(
@@ -269,3 +319,19 @@ def test_validation_error(runner, httpserver, simple_user_payload):
     )
     assert result.exit_code == 1, result.output
     assert "Expected type User but got undefined object with no schema" in result.output
+
+
+def test_service_provider_config(runner, httpserver):
+    """Test querying the ServiceProviderConfig singleton endpoint."""
+    result = runner.invoke(
+        cli,
+        ["--url", httpserver.url_for("/"), "query", "serviceproviderconfig"],
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0, result.output
+
+    json_output = json.loads(result.output)
+    assert json_output["schemas"] == [
+        "urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig"
+    ]
+    assert json_output["documentationUri"] == "https://scim.test"

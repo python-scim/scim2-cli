@@ -1,6 +1,5 @@
 import click
 from click import ClickException
-from scim2_client import SCIMClientError
 from scim2_models import Message
 from scim2_models import Resource
 from sphinx_click.rst_to_ansi_formatter import make_rst_to_ansi_formatter
@@ -8,6 +7,7 @@ from sphinx_click.rst_to_ansi_formatter import make_rst_to_ansi_formatter
 from scim2_cli.utils import exception_to_click_error
 
 from .utils import DOC_URL
+from .utils import SCIM_EXCEPTIONS
 from .utils import formatted_payload
 
 
@@ -39,7 +39,7 @@ def delete_cli(ctx, resource_type, id, indent):
     try:
         response = ctx.obj["client"].delete(resource_model, id, raise_scim_errors=False)
 
-    except SCIMClientError as scim_exc:
+    except SCIM_EXCEPTIONS as scim_exc:
         raise exception_to_click_error(scim_exc) from scim_exc
 
     if response:

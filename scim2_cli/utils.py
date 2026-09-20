@@ -3,10 +3,17 @@ import sys
 from enum import Enum
 
 import click
+from scim2_client import SCIMClientException
+from scim2_models import SCIMException
 from sphinx_click.rst_to_ansi_formatter import make_rst_to_ansi_formatter
 
 DOC_URL = "https://scim2-cli.readthedocs.io/"
 INDENTATION_SIZE = 4
+
+# scim2-client raises its own exceptions for transport and response issues, and
+# scim2-models SCIM exceptions for invalid request payloads and server errors.
+# The two hierarchies are unrelated, so both must be caught.
+SCIM_EXCEPTIONS = (SCIMClientException, SCIMException)
 
 
 class HeaderType(click.ParamType):

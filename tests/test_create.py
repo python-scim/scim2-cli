@@ -219,3 +219,22 @@ def test_command_validation_error(runner, httpserver, simple_user_payload):
     )
     assert result.exit_code == 1, result.output
     assert "Expected type User but got undefined object with no schema" in result.output
+
+
+def test_no_command_unknown_schema(runner, httpserver):
+    """Test that a payload with an unknown schema displays a readable error."""
+    payload = {
+        "schemas": [
+            "urn:ietf:params:scim:schemas:core:2.0:Unknown",
+        ],
+        "userName": "new-user@example.com",
+    }
+
+    result = runner.invoke(
+        cli,
+        ["--url", httpserver.url_for("/"), "create"],
+        input=json.dumps(payload),
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 1, result.output
+    assert "Cannot guess resource type from the payload" in result.output

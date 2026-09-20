@@ -88,11 +88,11 @@ You can store those data locally and reuse them for future command runs thanks t
 Query and search resources
 --------------------------
 
-Use the :ref:`query` and :ref:`search` commands to look for resources.
-:ref:`query` performs a `GET` request on the resources endpoint, while :ref:`search` performs a `POST` request on the ``/.search`` endpoint.
-Both commands take similar options such as :option:`--count <scim-query.--count>` or :option:`--attributes <scim-query.--attributes>`.
+Use the :ref:`reference:query` and :ref:`reference:search` commands to look for resources.
+:ref:`reference:query` performs a `GET` request on the resources endpoint, while :ref:`reference:search` performs a `POST` request on the ``/.search`` endpoint.
+Both commands take similar options such as :option:`--count <scim-query --count>` or :option:`--attribute <scim-query --attribute>`.
 An exhaustive list of options can be found on the :doc:`reference`.
-:ref:`query` can also take a :option:`RESOURCE_TYPE <scim-query.RESOURCE_TYPE>` and a :option:`ID <scim-query.ID>` parameters.
+:ref:`reference:query` can also take a :option:`RESOURCE_TYPE <scim-query RESOURCE_TYPE>` and a :option:`ID <scim-query ID>` parameters.
 
 - If none are set, all the resources of the server are queried.
 
@@ -109,7 +109,7 @@ An exhaustive list of options can be found on the :doc:`reference`.
           "itemsPerPage": 50,
           "Resources": [...]
       }
-- If :option:`RESOURCE_TYPE <scim-query.RESOURCE_TYPE>` is set and :option:`ID <scim-query.ID>` is unset, all the resource of the kind passed in parameter are returned.
+- If :option:`RESOURCE_TYPE <scim-query RESOURCE_TYPE>` is set and :option:`ID <scim-query ID>` is unset, all the resource of the kind passed in parameter are returned.
 
   .. code-block:: console
       :caption: Querying all the users from the server.
@@ -146,10 +146,11 @@ An exhaustive list of options can be found on the :doc:`reference`.
           },
           "userName": "bjensen@example.com"
       }
+
 Create and replace resources
 ----------------------------
 
-Use the :ref:`create` and :ref:`replace` commands to edit resources.
+Use the :ref:`reference:create` and :ref:`reference:replace` commands to edit resources.
 
 Options for those commands are dynamically generated, depending on the resource attributes available on the server.
 For instance, for the :class:`~scim2_models.User` resource, you have a ``--user-name`` option.
@@ -178,7 +179,7 @@ You can have a look at the exhaustive list of options by running ``scim create u
 Delete resources
 ----------------
 
-The :ref:`delete` command allows you to delete resources.
+The :ref:`reference:delete` command allows you to delete resources.
 
 .. code-block:: console
    :caption: Deletion of an user.
@@ -188,7 +189,7 @@ The :ref:`delete` command allows you to delete resources.
 Perform a SCIM compliance test
 ------------------------------
 
-The :ref:`test` command runs a series of resource creation, edition and deletions to check that your server complies with the SCIM specifications.
+The :ref:`reference:test` command runs a series of resource creation, edition and deletions to check that your server complies with the SCIM specifications.
 See the :doc:`scim2-tester documentation <scim2_tester:index>` for more details on which tests are performed.
 
 .. code-block:: console
@@ -211,7 +212,7 @@ JSON input
 scim2-cli will also read input data from the standard input.
 Use this to send custom payloads to the SCIM server.
 
-When user with :ref:`query` and :ref:`search`, the input value must be a JSON representation of a :class:`~scim2_models.SearchRequest` object:
+When user with :ref:`reference:query` and :ref:`reference:search`, the input value must be a JSON representation of a :class:`~scim2_models.SearchRequest` object:
 
 .. code-block:: console
    :caption: Search of an user by passing a custom payload.
@@ -227,7 +228,7 @@ When user with :ref:`query` and :ref:`search`, the input value must be a JSON re
         "Resources": [...]
     }
 
-When used with :ref:`create` and :ref:`replace`, no subcommand is needed and the endpoint is guessed from the payload.
+When used with :ref:`reference:create` and :ref:`reference:replace`, no subcommand is needed and the endpoint is guessed from the payload.
 
 .. code-block:: console
    :caption: Creation of an user by passing a custom payload.

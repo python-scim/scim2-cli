@@ -96,7 +96,6 @@ def query_cli(
                 f"Unknown resource type '{resource_type}. Available values are: {ok_values}'"
             ) from exc
 
-    # ServiceProviderConfig is a singleton endpoint, so it is reached without an id.
     single_resource = bool(id) or resource_type is ServiceProviderConfig
     listing_options = [
         name

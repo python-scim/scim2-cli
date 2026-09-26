@@ -137,6 +137,7 @@ env_list = [
     "py314",
     "minversions",
     "doc",
+    "bundle",
     "coverage",
 ]
 

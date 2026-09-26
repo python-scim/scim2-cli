@@ -118,6 +118,9 @@ force-single-line = true
 [tool.ruff.format]
 docstring-code-format = true
 
+[tool.codespell]
+ignore-words-list = "datas"
+
 [tool.mypy]
 plugins = [
   "pydantic.mypy"

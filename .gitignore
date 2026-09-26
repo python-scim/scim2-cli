@@ -11,6 +11,3 @@ htmlcov
 build
 dist
 .vscode
-
-# pyinstaller spec file
-*.spec

@@ -16,18 +16,23 @@ jobs:
         uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
         with:
           enable-cache: true
-      - name: build dist
+      - name: install dependencies
         run: uv sync --group bundle
       - name: build dist
         run: uv build
       - name: build binary
-        run: uv run pyinstaller scim2.spec
+        run: uv run pyinstaller --distpath bin scim2.spec
       - name: rename binary
-        run: mv dist/scim2 dist/scim2-linux
+        run: mv bin/scim2 bin/scim2-linux
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: artifacts
+          name: dist
           path: dist/*
+          if-no-files-found: error
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: binary
+          path: bin/scim2-linux
           if-no-files-found: error
 
   release:
@@ -37,12 +42,12 @@ jobs:
     steps:
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          name: artifacts
-          path: dist
+          name: binary
+          path: bin
       - uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
           files: |
-            dist/scim2-linux
+            bin/scim2-linux
   publish:
     name: release to pypi
     needs: build
@@ -57,7 +62,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          name: artifacts
+          name: dist
           path: dist
 
       - name: Push build artifacts to PyPI

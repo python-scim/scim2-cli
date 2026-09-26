@@ -1,6 +1,13 @@
 Changelog
 =========
 
+[Unreleased]
+------------
+
+Changed
+^^^^^^^
+- Python 3.11 is now the minimum supported version.
+
 [0.3.0] - 2026-09-20
 --------------------
 

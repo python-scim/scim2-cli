@@ -1,6 +1,5 @@
 import json
-import sys
-from enum import Enum
+from enum import StrEnum
 
 import click
 from scim2_client import SCIMClientException
@@ -18,7 +17,7 @@ class HeaderType(click.ParamType):
     name = "HEADER"
 
 
-class Color(str, Enum):
+class Color(StrEnum):
     black = "black"
     red = "red"
     green = "green"
@@ -115,8 +114,6 @@ def unacceptable_fields(context, model):
 
 def exception_to_click_error(exception):
     message = str(exception)
-    if sys.version_info >= (3, 11) and hasattr(
-        exception, "__notes__"
-    ):  # pragma: no cover
+    if hasattr(exception, "__notes__"):
         message += "\n" + "\n".join(exception.__notes__)
     return click.ClickException(message)

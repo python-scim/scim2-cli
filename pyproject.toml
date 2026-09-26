@@ -13,7 +13,6 @@ keywords = ["scim", "scim2", "provisioning", "rfc7643", "rfc7644"]
 classifiers = [
     "Intended Audience :: Developers",
     "Development Status :: 3 - Alpha",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -25,7 +24,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
-requires-python = ">= 3.10"
+requires-python = ">= 3.11"
 dependencies = [
     "click>=8.1.7",
     "scim2-client[httpx2]>=0.8.0",
@@ -137,7 +136,6 @@ testpaths = ["tests"]
 requires = ["tox>=4.19"]
 env_list = [
     "style",
-    "py310",
     "py311",
     "py312",
     "py313",

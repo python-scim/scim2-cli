@@ -1,4 +1,5 @@
 import json
+import re
 from enum import StrEnum
 
 import click
@@ -10,6 +11,10 @@ DOC_URL = "https://scim2-cli.readthedocs.io/"
 INDENTATION_SIZE = 4
 
 SCIM_EXCEPTIONS = (SCIMClientException, SCIMException)
+
+CONTROL_CHARACTERS = re.compile(
+    "[\x00-\x08\x0b-\x1f\x7f-\x9f\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]"
+)
 
 
 class HeaderType(click.ParamType):
@@ -34,6 +39,25 @@ class Color(StrEnum):
     bright_magenta = "bright_magenta"
     bright_cyan = "bright_cyan"
     bright_white = "bright_white"
+
+
+def escape_control_characters(text) -> str:
+    """Replace the control characters of a text by their escaped form.
+
+    The texts coming from the server would otherwise be interpreted by the
+    terminal as escape sequences.
+    """
+    return CONTROL_CHARACTERS.sub(
+        lambda match: match.group().encode("unicode_escape").decode(), str(text)
+    )
+
+
+def escape_options_help(command):
+    """Escape the option help texts pydanclick takes from the schema descriptions."""
+    for param in command.params:
+        if param.help:
+            param.help = escape_control_characters(param.help)
+    return command
 
 
 def formatted_payload(obj, indent):
@@ -116,4 +140,4 @@ def exception_to_click_error(exception):
     message = str(exception)
     if hasattr(exception, "__notes__"):
         message += "\n" + "\n".join(exception.__notes__)
-    return click.ClickException(message)
+    return click.ClickException(escape_control_characters(message))

@@ -8,6 +8,13 @@ Changed
 ^^^^^^^
 - Python 3.11 is now the minimum supported version.
 
+Security
+^^^^^^^^
+- The control characters of what the server sends are escaped before being displayed, so
+  the server cannot rewrite the output on the terminal with escape sequences. This covers
+  the :ref:`reference:test` report, the error messages, the subcommand names and the
+  option help taken from the schema descriptions.
+
 [0.3.0] - 2026-09-20
 --------------------
 

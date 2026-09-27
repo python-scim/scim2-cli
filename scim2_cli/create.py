@@ -7,6 +7,7 @@ from sphinx_click.rst_to_ansi_formatter import make_rst_to_ansi_formatter
 from scim2_cli.utils import DOC_URL
 from scim2_cli.utils import SCIM_EXCEPTIONS
 from scim2_cli.utils import ModelCommand
+from scim2_cli.utils import escape_options_help
 from scim2_cli.utils import exception_to_click_error
 from scim2_cli.utils import formatted_payload
 from scim2_cli.utils import unacceptable_fields
@@ -75,7 +76,7 @@ def create_factory(model):
 
         create_payload(ctx.obj["client"], payload, indent)
 
-    return create_command
+    return escape_options_help(create_command)
 
 
 @click.command(

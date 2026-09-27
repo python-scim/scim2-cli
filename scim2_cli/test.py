@@ -7,6 +7,7 @@ from sphinx_click.rst_to_ansi_formatter import make_rst_to_ansi_formatter
 
 from .utils import DOC_URL
 from .utils import Color
+from .utils import escape_control_characters
 
 
 @click.command(cls=make_rst_to_ansi_formatter(DOC_URL), name="test")
@@ -43,11 +44,11 @@ def test_cli(ctx, verbose, check_status_code, check_content_type):
         else:
             status = click.style(result.status.name, fg=Color.red)
             success = False
-        click.echo(f"{status} {result.title}")
+        click.echo(f"{status} {escape_control_characters(result.title)}")
 
         if result.reason:
-            click.echo(f"  {result.reason}")
+            click.echo(f"  {escape_control_characters(result.reason)}")
             if verbose and result.data:
-                click.echo(f"  {result.data}")
+                click.echo(f"  {escape_control_characters(result.data)}")
 
     sys.exit(0 if success else 1)

@@ -4,6 +4,7 @@ from pydanclick import from_pydantic
 from scim2_models import Context
 from sphinx_click.rst_to_ansi_formatter import make_rst_to_ansi_formatter
 
+from scim2_cli.utils import escape_options_help
 from scim2_cli.utils import exception_to_click_error
 
 from .utils import DOC_URL
@@ -82,7 +83,7 @@ def replace_factory(model):
             indent,
         )
 
-    return replace_command
+    return escape_options_help(replace_command)
 
 
 @click.command(

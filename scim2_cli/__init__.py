@@ -22,6 +22,7 @@ from scim2_cli.test import test_cli
 from scim2_cli.utils import DOC_URL
 from scim2_cli.utils import SCIM_EXCEPTIONS
 from scim2_cli.utils import HeaderType
+from scim2_cli.utils import escape_control_characters
 from scim2_cli.utils import exception_to_click_error
 from scim2_cli.utils import split_headers
 
@@ -143,7 +144,9 @@ def cli(
 
     ctx.obj["client"] = scim_client
     ctx.obj["resource_models"] = {
-        re.sub(r"\[.*\]", "", resource_model.__name__.lower()): resource_model
+        escape_control_characters(
+            re.sub(r"\[.*\]", "", resource_model.__name__.lower())
+        ): resource_model
         for resource_model in ctx.obj["client"].resource_models
     }
 

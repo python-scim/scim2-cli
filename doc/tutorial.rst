@@ -57,6 +57,17 @@ To make commands shorter, you can set those parameters once for all by using the
         },
     }
 
+.. warning::
+
+   Other users of the machine can see the command line arguments, for instance with ``ps``.
+   The shell history also keeps them.
+   Pass secrets such as authentication tokens with :ref:`SCIM_CLI_HEADERS <scim-header-scim_cli_headers>` instead of :option:`--header <scim --header>`.
+   Read them from a file rather than typing them:
+
+   .. code-block:: shell
+
+       $ export SCIM_CLI_HEADERS="Authorization: Bearer $(cat ~/.scim-token)"
+
 
 Server configuration
 --------------------

@@ -25,6 +25,9 @@ Security
   the server cannot rewrite the output on the terminal with escape sequences. This covers
   the :ref:`reference:test` report, the error messages, the subcommand names and the
   option help taken from the schema descriptions.
+- The documentation and the :option:`--header <scim --header>` help recommend passing the
+  authentication tokens with :ref:`SCIM_CLI_HEADERS <scim-header-scim_cli_headers>`, as other
+  users of the machine can see the command line arguments.
 
 [0.3.0] - 2026-09-20
 --------------------

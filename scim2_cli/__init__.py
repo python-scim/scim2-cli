@@ -63,7 +63,7 @@ def describe_server(
     "--header",
     multiple=True,
     type=HeaderType(),
-    help="Headers to pass in the HTTP requests. Can be passed multiple times.",
+    help="Headers to pass in the HTTP requests. Can be passed multiple times. Other users of the machine can see the command line arguments, so pass the secrets with the SCIM_CLI_HEADERS environment variable.",
     envvar="SCIM_CLI_HEADERS",
 )
 @click.option(

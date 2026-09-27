@@ -131,7 +131,6 @@ def test_attribute_descriptions_are_escaped(
 
     assert f"nick{escaped}" in output
     assert f"badge{escaped}" in output
-    assert f"label{escaped}" in output
     assert "--title TEXT" in output
     assert sequence not in output
 

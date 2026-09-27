@@ -8,6 +8,12 @@ Changed
 ^^^^^^^
 - Python 3.11 is now the minimum supported version.
 
+Fixed
+^^^^^
+- Without ``--schemas``, the schemas and the resource types are discovered on the server
+  again with scim2-client 0.9. Only ``User`` and ``Group`` were known, without their
+  extensions.
+
 Security
 ^^^^^^^^
 - The control characters of what the server sends are escaped before being displayed, so

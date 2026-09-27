@@ -4,13 +4,11 @@ import re
 import click
 from httpx2 import Client
 from scim2_client.engines.httpx2 import SyncSCIMClient
-from scim2_models import Group
 from scim2_models import ListResponse
 from scim2_models import Resource
 from scim2_models import ResourceType
 from scim2_models import Schema
 from scim2_models import ServiceProviderConfig
-from scim2_models import User
 from sphinx_click.rst_to_ansi_formatter import make_rst_to_ansi_formatter
 
 from scim2_cli.create import create_cli
@@ -30,7 +28,9 @@ from scim2_cli.utils import split_headers
 def load_config_files(
     schemas_fd, resource_types_fd, service_provider_config_fd
 ) -> tuple[
-    list[type[Resource]], list[ResourceType] | None, ServiceProviderConfig | None
+    list[type[Resource]] | None,
+    list[ResourceType] | None,
+    ServiceProviderConfig | None,
 ]:
     if schemas_fd:
         schemas_payload = json.load(schemas_fd)
@@ -41,7 +41,7 @@ def load_config_files(
         resource_models = [Resource.from_schema(schema) for schema in schemas_obj]
 
     else:
-        resource_models = [User, Group]
+        resource_models = None
 
     if resource_types_fd:
         resource_types_payload = json.load(resource_types_fd)

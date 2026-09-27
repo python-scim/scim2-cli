@@ -7,12 +7,17 @@ Changelog
 Changed
 ^^^^^^^
 - Python 3.11 is now the minimum supported version.
+- scim2-client 0.9.0 and scim2-tester 0.4.0 are now the minimum supported versions.
 
 Fixed
 ^^^^^
-- Without ``--schemas``, the schemas and the resource types are discovered on the server
-  again with scim2-client 0.9. Only ``User`` and ``Group`` were known, without their
-  extensions.
+- What the configuration files leave out is discovered on the server again with
+  scim2-client 0.9. Without ``--schemas``, only ``User`` and ``Group`` were known,
+  without their extensions. With ``--schemas`` only, the resource types were guessed
+  from the schemas.
+- ``--resource-types`` without ``--schemas`` no longer crashes.
+- A server description whose resource types name unknown schemas is reported as a
+  readable error instead of a traceback.
 
 Security
 ^^^^^^^^

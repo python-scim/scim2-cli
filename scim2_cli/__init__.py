@@ -5,9 +5,10 @@ import click
 from httpx2 import Client
 from scim2_client.engines.httpx2 import SyncSCIMClient
 from scim2_models import ListResponse
-from scim2_models import Resource
 from scim2_models import ResourceType
 from scim2_models import Schema
+from scim2_models import ScimProvider
+from scim2_models import ScimProviderError
 from scim2_models import ServiceProviderConfig
 from sphinx_click.rst_to_ansi_formatter import make_rst_to_ansi_formatter
 
@@ -25,46 +26,34 @@ from scim2_cli.utils import exception_to_click_error
 from scim2_cli.utils import split_headers
 
 
-def load_config_files(
-    schemas_fd, resource_types_fd, service_provider_config_fd
-) -> tuple[
-    list[type[Resource]] | None,
-    list[ResourceType] | None,
-    ServiceProviderConfig | None,
-]:
-    if schemas_fd:
-        schemas_payload = json.load(schemas_fd)
-        if isinstance(schemas_payload, dict):
-            schemas_obj = ListResponse[Schema].model_validate(schemas_payload).resources
-        else:
-            schemas_obj = [Schema.model_validate(schema) for schema in schemas_payload]
-        resource_models = [Resource.from_schema(schema) for schema in schemas_obj]
+def load_objects(fd, model):
+    """Read a list of objects, bare or wrapped in a ListResponse, from a JSON file."""
+    payload = json.load(fd)
+    if isinstance(payload, dict):
+        return ListResponse[model].model_validate(payload).resources or []
+    return [model.model_validate(item) for item in payload]
 
-    else:
-        resource_models = None
 
-    if resource_types_fd:
-        resource_types_payload = json.load(resource_types_fd)
-        if isinstance(schemas_payload, dict):
-            resource_types = (
-                ListResponse[ResourceType]
-                .model_validate(resource_types_payload)
-                .resources
-            )
-        else:
-            resource_types = [
-                ResourceType.model_validate(item) for item in resource_types_payload
-            ]
-    else:
-        resource_types = None
-
-    if service_provider_config_fd:
-        spc_payload = json.load(service_provider_config_fd)
-        service_provider_config = ServiceProviderConfig.model_validate(spc_payload)
-    else:
-        service_provider_config = None
-
-    return resource_models, resource_types, service_provider_config
+def describe_server(
+    scim_client, schemas_fd, resource_types_fd, service_provider_config_fd
+) -> ScimProvider:
+    """Describe the server with the configuration files, and query it for the others."""
+    resource_types = (
+        load_objects(resource_types_fd, ResourceType)
+        if resource_types_fd
+        else scim_client.query(ResourceType).resources or []
+    )
+    schemas = (
+        load_objects(schemas_fd, Schema)
+        if schemas_fd
+        else scim_client.query(Schema).resources or []
+    )
+    config = (
+        ServiceProviderConfig.model_validate(json.load(service_provider_config_fd))
+        if service_provider_config_fd
+        else scim_client.query(ServiceProviderConfig)
+    )
+    return ScimProvider.from_discovery(schemas, resource_types, config)
 
 
 @click.group(cls=make_rst_to_ansi_formatter(DOC_URL, group=True))
@@ -123,31 +112,21 @@ def cli(
     headers_dict = split_headers(header)
     client = Client(base_url=url, headers=headers_dict, verify=not no_verify)
 
-    resource_models, resource_types_obj, spc_obj = load_config_files(
-        schemas, resource_types, service_provider_config
-    )
-
-    scim_client = SyncSCIMClient(
-        client,
-        resource_models=resource_models,
-        resource_types=resource_types_obj,
-        service_provider_config=spc_obj,
-    )
+    scim_client = SyncSCIMClient(client)
     try:
-        scim_client.discover(
-            schemas=not bool(schemas),
-            resource_types=not bool(resource_types),
-            service_provider_config=not bool(service_provider_config),
+        scim_client.provider = describe_server(
+            scim_client, schemas, resource_types, service_provider_config
         )
-    except SCIM_EXCEPTIONS as exc:
+    except (*SCIM_EXCEPTIONS, ScimProviderError) as exc:
         raise exception_to_click_error(exc) from exc
 
+    provider = scim_client.provider
     ctx.obj["client"] = scim_client
     ctx.obj["resource_models"] = {
         escape_control_characters(
             re.sub(r"\[.*\]", "", resource_model.__name__.lower())
         ): resource_model
-        for resource_model in ctx.obj["client"].resource_models
+        for resource_model in map(provider.model_for, provider.resource_types)
     }
 
     if not click.get_text_stream("stdin").isatty():  # pragma: no cover

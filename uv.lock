@@ -580,6 +580,15 @@ wheels = [
 ]
 
 [[package]]
+name = "lark"
+version = "1.3.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/da/34/28fff3ab31ccff1fd4f6c7c7b0ceb2b6968d8ea4950663eadcb5720591a0/lark-1.3.1.tar.gz", hash = "sha256:b426a7a6d6d53189d318f2b6236ab5d6429eaf09259f1ca33eb716eed10d2905", size = 382732, upload-time = "2025-10-27T18:25:56.653Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/82/3d/14ce75ef66813643812f3093ab17e46d3a206942ce7376d31ec2d36229e7/lark-1.3.1-py3-none-any.whl", hash = "sha256:c629b661023a014c37da873b4ff58a817398d12635d3bbb2c5a03be7fe5d1e12", size = 113151, upload-time = "2025-10-27T18:25:54.882Z" },
+]
+
+[[package]]
 name = "librt"
 version = "0.15.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1350,8 +1359,8 @@ requires-dist = [
     { name = "click", specifier = ">=8.1.7" },
     { name = "pydanclick", specifier = ">=0.5.0" },
     { name = "pygments", specifier = ">=2.18.0" },
-    { name = "scim2-client", extras = ["httpx2"], specifier = ">=0.8.0" },
-    { name = "scim2-tester", specifier = ">=0.3.0" },
+    { name = "scim2-client", extras = ["httpx2"], specifier = ">=0.9.0" },
+    { name = "scim2-tester", specifier = ">=0.4.0" },
     { name = "sphinx-click-rst-to-ansi-formatter", specifier = ">=0.1.0" },
 ]
 
@@ -1378,14 +1387,14 @@ doc = [
 
 [[package]]
 name = "scim2-client"
-version = "0.8.0"
+version = "0.9.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "scim2-models" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/5a/a6/f31df435773d1399cdeabd9a6a697d69c0c83917746a7ccd8aff70dd9e49/scim2_client-0.8.0.tar.gz", hash = "sha256:b807b51f38db0f519b74873024c7efbbebcbe79fc3c688cc2a8ef82a2a497c28", size = 21796, upload-time = "2026-09-20T15:29:31.958Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/fb/38/66f80e10ceb9e4c09d59673db73f6a93447d776e9863b9136f354f6d8599/scim2_client-0.9.0.tar.gz", hash = "sha256:ea23fbf6e00925f00ab6fb1ca197f07ba5eaac4c8b997c8ae75dbf04881b2ff3", size = 24648, upload-time = "2026-09-21T15:17:21.761Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/86/ed/28235414f6fd5c5dbd336937f93182ebcf08e63806f2f5cc7dde58cd0def/scim2_client-0.8.0-py3-none-any.whl", hash = "sha256:25934fe9a3f08bde13749ddc87da1405a40390c92262021df4b4b8c4eda7662c", size = 23456, upload-time = "2026-09-20T15:29:30.78Z" },
+    { url = "https://files.pythonhosted.org/packages/43/56/045f768efb51a7cf7c517e37690922fffd67bac32d4fbb9fd8722a2a01de/scim2_client-0.9.0-py3-none-any.whl", hash = "sha256:5b40b65fb6b74ce17e5dd0164540367f761f86dbcc4818e72f33bad0ea17cdd4", size = 26130, upload-time = "2026-09-21T15:17:20.585Z" },
 ]
 
 [package.optional-dependencies]
@@ -1395,27 +1404,28 @@ httpx2 = [
 
 [[package]]
 name = "scim2-models"
-version = "0.7.0"
+version = "0.8.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
+    { name = "lark" },
     { name = "pydantic", extra = ["email"] },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/7e/3d/b967a207f4182b6985f2128304cd69016c5ec5c29dc0bec2212848112331/scim2_models-0.7.0.tar.gz", hash = "sha256:ac5e59944a87c0862464d160fc4426cf59a99740bdd14ddf459d621ee4fa7aac", size = 49250, upload-time = "2026-09-05T10:35:43.35Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d5/61/bf0746a7ab542c937b3888375f4df8857824a37833df7a5c3eb5ea7d0bd0/scim2_models-0.8.2.tar.gz", hash = "sha256:8ee4b69687d2680c06827af24a50c93a1d33fbfe0be492e0b2db34f4c5233ecd", size = 94332, upload-time = "2026-09-25T19:07:50.984Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/be/ce/09f7b8e5fc32c62af5434d88f47106205a1deb81952c14438cbd3d287065/scim2_models-0.7.0-py3-none-any.whl", hash = "sha256:4212d8b74fc744700c23d4f5c87866b984449201873f2b6f7bb44c6c5b6f8088", size = 62805, upload-time = "2026-09-05T10:35:41.917Z" },
+    { url = "https://files.pythonhosted.org/packages/e0/8e/6a793d8f2e2cb7f1f180f277b47ca104dbf87a14b8d53abd4e7f3ae37db9/scim2_models-0.8.2-py3-none-any.whl", hash = "sha256:b27eec4847cfdc57e173f78e81004932e7d7298e3192d05f5fe1ec579f4735e9", size = 116865, upload-time = "2026-09-25T19:07:49.035Z" },
 ]
 
 [[package]]
 name = "scim2-tester"
-version = "0.3.0"
+version = "0.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "scim2-client" },
     { name = "scim2-models" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/10/7f/736a93c80c06572a3381cf13ba3a5e1e8c92d0b1b8473217d07a5d6d4a53/scim2_tester-0.3.0.tar.gz", hash = "sha256:6b22b682809f9e08b4cef4349a2c7b53f86c95e4c2fbfbd5d70c99f11c19aa7c", size = 26498, upload-time = "2026-09-20T17:55:16.26Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/1c/10/c5ef8a0da6a85142b204994db4a631a36f3e2d0f07e4f22f1605334e9996/scim2_tester-0.4.0.tar.gz", hash = "sha256:7300596e60db09f7ebde5745ebb33c16ca4d6432af596f0867e1abf567b4fffb", size = 27302, upload-time = "2026-09-21T16:30:24.818Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/3e/61/acc6e5f793ef12d68ff05f9b207de7e5315c64c1d382e12790bb6c537785/scim2_tester-0.3.0-py3-none-any.whl", hash = "sha256:80831dc64b13e829b32ae926c086859a9b1e11f9fa838b79b46f174d6c53bffb", size = 38842, upload-time = "2026-09-20T17:55:14.751Z" },
+    { url = "https://files.pythonhosted.org/packages/a3/74/aceb8ca0d4a6c098d53d711f3d9cc146ed9cc75a8cb35587e948f9e526c2/scim2_tester-0.4.0-py3-none-any.whl", hash = "sha256:345bd2eac5e2f0006a1448e720ad86e95099af594580a55b4b44384b84303d6a", size = 39664, upload-time = "2026-09-21T16:30:23.56Z" },
 ]
 
 [[package]]

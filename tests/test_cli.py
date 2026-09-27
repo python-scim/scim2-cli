@@ -275,6 +275,134 @@ def test_custom_configuration_in_list_response(
     assert result.exit_code == 0
 
 
+@pytest.mark.parametrize("in_list_response", [False, True])
+def test_custom_resource_types_only(
+    runner, httpserver, simple_user_payload, tmp_path, resource_types, in_list_response
+):
+    """Test passing only the resource types, the schemas being discovered."""
+    payload = (
+        ListResponse[ResourceType](
+            total_results=len(resource_types),
+            start_index=1,
+            items_per_page=len(resource_types),
+            resources=resource_types,
+        ).model_dump()
+        if in_list_response
+        else [resource_type.model_dump() for resource_type in resource_types]
+    )
+    resource_types_path = tmp_path / "resource_types.json"
+    with open(resource_types_path, "w") as fd:
+        json.dump(payload, fd)
+
+    httpserver.expect_request(
+        "/somewhere-different/foobar",
+        method="GET",
+    ).respond_with_json(
+        simple_user_payload("foobar"),
+        status=200,
+        content_type="application/scim+json",
+    )
+
+    result = runner.invoke(
+        cli,
+        [
+            "--url",
+            httpserver.url_for("/"),
+            "--resource-types",
+            resource_types_path,
+            "query",
+            "user",
+            "foobar",
+        ],
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0, result.output
+
+
+def test_custom_schemas_only(
+    runner,
+    httpserver,
+    simple_user_payload,
+    tmp_path,
+    service_provider_configuration,
+    schemas,
+    resource_types,
+):
+    """Test passing only the schemas, the resource types being discovered."""
+    schemas_path = tmp_path / "schemas.json"
+    with open(schemas_path, "w") as fd:
+        json.dump([schema.model_dump() for schema in schemas], fd)
+
+    httpserver.clear_all_handlers()
+    httpserver.expect_request("/ResourceTypes").respond_with_json(
+        ListResponse[ResourceType](
+            total_results=len(resource_types), resources=resource_types
+        ).model_dump(),
+        content_type="application/scim+json",
+    )
+    httpserver.expect_request("/ServiceProviderConfig").respond_with_json(
+        service_provider_configuration.model_dump(),
+        content_type="application/scim+json",
+    )
+    httpserver.expect_request(
+        "/somewhere-different/foobar",
+        method="GET",
+    ).respond_with_json(
+        simple_user_payload("foobar"),
+        status=200,
+        content_type="application/scim+json",
+    )
+
+    result = runner.invoke(
+        cli,
+        [
+            "--url",
+            httpserver.url_for("/"),
+            "--schemas",
+            schemas_path,
+            "query",
+            "user",
+            "foobar",
+        ],
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0, result.output
+
+
+def test_incoherent_server_description(runner, httpserver, tmp_path, schemas):
+    """Test that a resource type naming an unknown schema displays a readable error."""
+    resource_types_path = tmp_path / "resource_types.json"
+    with open(resource_types_path, "w") as fd:
+        json.dump(
+            [
+                ResourceType(
+                    id="Group",
+                    name="Group",
+                    endpoint="/Groups",
+                    schema_="urn:ietf:params:scim:schemas:core:2.0:Group",
+                ).model_dump()
+            ],
+            fd,
+        )
+
+    result = runner.invoke(
+        cli,
+        [
+            "--url",
+            httpserver.url_for("/"),
+            "--resource-types",
+            resource_types_path,
+            "query",
+        ],
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 1, result.output
+    assert (
+        "Error: No resource describes urn:ietf:params:scim:schemas:core:2.0:Group"
+        in result.output
+    )
+
+
 def test_custom_configuration_by_env(
     runner,
     httpserver,

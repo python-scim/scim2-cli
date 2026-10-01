@@ -1,9 +1,16 @@
 import json
 import re
+from collections.abc import Callable
 from enum import StrEnum
+from typing import TYPE_CHECKING
+from typing import Any
 
 import click
 from scim2_client import SCIMClientException
+from scim2_models import BaseModel
+from scim2_models import Context
+from scim2_models import Mutability
+from scim2_models import Resource
 from scim2_models import SCIMException
 from sphinx_click.rst_to_ansi_formatter import make_rst_to_ansi_formatter
 
@@ -17,7 +24,7 @@ CONTROL_CHARACTERS = re.compile(
 )
 
 
-class HeaderType(click.ParamType):
+class HeaderType(click.types.StringParamType):
     envvar_list_splitter = ";"
     name = "HEADER"
 
@@ -41,7 +48,7 @@ class Color(StrEnum):
     bright_white = "bright_white"
 
 
-def escape_control_characters(text) -> str:
+def escape_control_characters(text: object) -> str:
     """Replace the control characters of a text by their escaped form.
 
     The texts coming from the server would otherwise be interpreted by the
@@ -52,17 +59,16 @@ def escape_control_characters(text) -> str:
     )
 
 
-def escape_options_help(command):
+def escape_options_help(command: click.Command) -> click.Command:
     """Escape the option help texts pydanclick takes from the schema descriptions."""
     for param in command.params:
-        if param.help:
+        if isinstance(param, click.Option) and param.help:
             param.help = escape_control_characters(param.help)
     return command
 
 
-def formatted_payload(obj, indent):
-    indent = INDENTATION_SIZE if indent else False
-    return json.dumps(obj, indent=indent)
+def formatted_payload(obj: Any, indent: bool) -> str:
+    return json.dumps(obj, indent=INDENTATION_SIZE if indent else None)
 
 
 def split_headers(headers: list[str]) -> dict[str, str]:
@@ -76,32 +82,40 @@ def split_headers(headers: list[str]) -> dict[str, str]:
     }
 
 
-RSTCommand: click.Group = make_rst_to_ansi_formatter(DOC_URL, group=True)
+# mypy cannot subclass a class built at runtime by a factory.
+if TYPE_CHECKING:
+    RSTCommand = click.Group
+else:
+    RSTCommand = make_rst_to_ansi_formatter(DOC_URL, group=True)
 
 
 class ModelCommand(RSTCommand):
     """CLI commands that takes a model subcommand."""
 
-    def __init__(self, *args, factory, **kwargs):
+    def __init__(
+        self,
+        *args: Any,
+        factory: Callable[[type[Resource[Any]] | None], click.Command],
+        **kwargs: Any,
+    ) -> None:
         super().__init__(*args, **kwargs)
         self.factory = factory
 
-    def list_commands(self, ctx):
+    def list_commands(self, ctx: click.Context) -> list[str]:
         ctx.ensure_object(dict)
         base = super().list_commands(ctx)
         lazy = sorted(ctx.obj.get("resource_models", {}).keys())
         return base + lazy
 
-    def get_command(self, ctx, cmd_name):
+    def get_command(self, ctx: click.Context, cmd_name: str) -> click.Command:
         model = ctx.obj["resource_models"].get(cmd_name)
         return self.factory(model)
 
 
-def is_field_acceptable(context, model, field_name) -> bool:
+def is_field_acceptable(
+    context: Context, model: type[BaseModel], field_name: str
+) -> bool:
     """Indicate whether a field is acceptable as part of a SCIM payload for a given context."""
-    from scim2_models import Context
-    from scim2_models import Mutability
-
     mutability = model.get_field_annotation(field_name, Mutability)
 
     if (
@@ -126,7 +140,7 @@ def is_field_acceptable(context, model, field_name) -> bool:
     return True
 
 
-def unacceptable_fields(context, model):
+def unacceptable_fields(context: Context, model: type[BaseModel]) -> list[str]:
     excluded = [
         field_name
         for field_name in model.model_fields
@@ -136,7 +150,7 @@ def unacceptable_fields(context, model):
     return excluded
 
 
-def exception_to_click_error(exception):
+def exception_to_click_error(exception: Exception) -> click.ClickException:
     message = str(exception)
     if hasattr(exception, "__notes__"):
         message += "\n" + "\n".join(exception.__notes__)

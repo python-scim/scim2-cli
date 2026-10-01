@@ -56,18 +56,18 @@ from .utils import formatted_payload
     help="Indent JSON response payloads.",
 )
 def query_cli(
-    ctx,
+    ctx: click.Context,
     resource_type: str | None,
     id: str | None,
     attribute: list[str],
     excluded_attribute: list[str],
-    start_index: int,
-    count: int,
-    filter: str,
-    sort_by: str,
-    sort_order: str,
+    start_index: int | None,
+    count: int | None,
+    filter: str | None,
+    sort_by: str | None,
+    sort_order: str | None,
     indent: bool,
-):
+) -> None:
     """Perform a `SCIM GET <https://www.rfc-editor.org/rfc/rfc7644#section-3.4.1>`_ request on the :code:`RESOURCE_TYPE` endpoint.
 
     - If :code:`RESOURCE_TYPE` is :code:`user` and :code:`id` is `1234`, then the request will made on the :code:`/Users/1234` endpoint.
@@ -84,19 +84,20 @@ def query_cli(
         echo '{"startIndex": 50, "count": 10}' |  query user
 
     """
-    for model in (Schema, ResourceType, ServiceProviderConfig):
-        ctx.obj["resource_models"][model.__name__.lower()] = model
+    for discovery_model in (Schema, ResourceType, ServiceProviderConfig):
+        ctx.obj["resource_models"][discovery_model.__name__.lower()] = discovery_model
 
+    model = None
     if resource_type:
         try:
-            resource_type = ctx.obj["resource_models"][resource_type]
+            model = ctx.obj["resource_models"][resource_type]
         except KeyError as exc:
             ok_values = ", ".join(ctx.obj["resource_models"])
             raise ClickException(
                 f"Unknown resource type '{resource_type}. Available values are: {ok_values}'"
             ) from exc
 
-    single_resource = bool(id) or resource_type is ServiceProviderConfig
+    single_resource = bool(id) or model is ServiceProviderConfig
     listing_options = [
         name
         for name, value in (
@@ -119,26 +120,30 @@ def query_cli(
 
     elif single_resource:
         check_request_payload = True
-        payload = ResponseParameters(
-            attributes=attribute,
-            excluded_attributes=excluded_attribute,
+        payload = ResponseParameters.model_validate(
+            {
+                "attributes": attribute,
+                "excluded_attributes": excluded_attribute,
+            }
         )
 
     else:
         check_request_payload = True
-        payload = SearchRequest(
-            attributes=attribute,
-            excluded_attributes=excluded_attribute,
-            start_index=start_index,
-            count=count,
-            filter=filter,
-            sort_by=sort_by,
-            sort_order=sort_order,
+        payload = SearchRequest.model_validate(
+            {
+                "attributes": attribute,
+                "excluded_attributes": excluded_attribute,
+                "start_index": start_index,
+                "count": count,
+                "filter": filter,
+                "sort_by": sort_by,
+                "sort_order": sort_order,
+            }
         )
 
     try:
         response = ctx.obj["client"].query(
-            resource_type,
+            model,
             id,
             query_parameters=payload,
             check_request_payload=check_request_payload,

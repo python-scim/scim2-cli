@@ -132,6 +132,25 @@ def test_all(runner, httpserver, simple_user_payload):
     }
 
 
+def test_no_indent(runner, httpserver):
+    """The --no-indent option prints the response payload on a single line."""
+    result = runner.invoke(
+        cli,
+        [
+            "--url",
+            httpserver.url_for("/"),
+            "query",
+            "--no-indent",
+        ],
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0, result.output
+
+    output = result.output.rstrip("\n")
+    assert "\n" not in output
+    assert json.loads(output)["totalResults"] == 1
+
+
 def test_get_by_id(runner, httpserver, simple_user_payload):
     """Test passing a resource and an id."""
     result = runner.invoke(

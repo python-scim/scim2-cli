@@ -1,6 +1,18 @@
 Changelog
 =========
 
+[Unreleased]
+------------
+
+Changed
+^^^^^^^
+- The code is checked with mypy in strict mode.
+
+Fixed
+^^^^^
+- ``--no-indent`` prints the JSON response on a single line. It used to print each
+  value on its own line.
+
 [0.4.0] - 2026-09-27
 --------------------
 

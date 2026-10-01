@@ -42,7 +42,7 @@ funding = "https://github.com/sponsors/python-scim"
 
 [dependency-groups]
 dev = [
-    "mypy>=1.13.0",
+    "mypy>=2.3.1",
     "prek>=0.1.0",
     "pytest>=8.2.1",
     "pytest-cov>=6.0.0",
@@ -89,6 +89,7 @@ exclude_lines = [
     "raise NotImplementedError",
     "except ImportError",
     "if app.debug",
+    "if TYPE_CHECKING:",
 ]
 
 [tool.ruff.lint]
@@ -128,6 +129,12 @@ ignore-words-list = "datas"
 plugins = [
   "pydantic.mypy"
 ]
+files = ["scim2_cli"]
+strict = true
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -25,7 +25,9 @@ from .utils import escape_control_characters
     default=True,
     help="Fail on unexpected content types.",
 )
-def test_cli(ctx, verbose, check_status_code, check_content_type):
+def test_cli(
+    ctx: click.Context, verbose: bool, check_status_code: bool, check_content_type: bool
+) -> None:
     """Perform a server SCIM compliance check using :doc:`scim2-tester <scim2_tester:index>`.
 
     .. code-block:: bash

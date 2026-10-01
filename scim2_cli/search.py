@@ -49,16 +49,16 @@ from .utils import formatted_payload
     help="Indent JSON response payloads.",
 )
 def search_cli(
-    ctx,
+    ctx: click.Context,
     attribute: list[str],
     excluded_attribute: list[str],
-    start_index: int,
-    count: int,
-    filter: str,
-    sort_by: str,
-    sort_order: str,
+    start_index: int | None,
+    count: int | None,
+    filter: str | None,
+    sort_by: str | None,
+    sort_order: str | None,
     indent: bool,
-):
+) -> None:
     """Perform a `SCIM GET <https://www.rfc-editor.org/rfc/rfc7644#section-3.4.1>`_ request on the :code:`/.search` endpoint.
 
     Data passed in JSON format to stdin is sent as request arguments and all the other query arguments are ignored:
@@ -74,14 +74,16 @@ def search_cli(
 
     else:
         check_request_payload = True
-        payload = SearchRequest(
-            attributes=attribute,
-            excluded_attributes=excluded_attribute,
-            start_index=start_index,
-            count=count,
-            filter=filter,
-            sort_by=sort_by,
-            sort_order=sort_order,
+        payload = SearchRequest.model_validate(
+            {
+                "attributes": attribute,
+                "excluded_attributes": excluded_attribute,
+                "start_index": start_index,
+                "count": count,
+                "filter": filter,
+                "sort_by": sort_by,
+                "sort_order": sort_order,
+            }
         )
 
     try:

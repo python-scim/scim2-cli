@@ -1,7 +1,13 @@
+from typing import Any
+from typing import cast
+
 import click
 from click import ClickException
 from pydanclick import from_pydantic
+from scim2_client.engines.httpx2 import SyncSCIMClient
 from scim2_models import Context
+from scim2_models import Error
+from scim2_models import Resource
 from sphinx_click.rst_to_ansi_formatter import make_rst_to_ansi_formatter
 
 from scim2_cli.utils import DOC_URL
@@ -13,18 +19,22 @@ from scim2_cli.utils import formatted_payload
 from scim2_cli.utils import unacceptable_fields
 
 
-def create_payload(client, payload, indent):
+def create_payload(
+    client: SyncSCIMClient, payload: Resource[Any] | dict[str, Any], indent: bool
+) -> None:
     try:
-        response = client.create(payload, raise_scim_errors=False)
+        # Response payloads are always checked, so the client never returns a dict.
+        response = cast(
+            "Resource[Any] | Error", client.create(payload, raise_scim_errors=False)
+        )
 
     except SCIM_EXCEPTIONS as scim_exc:
         raise exception_to_click_error(scim_exc) from scim_exc
 
-    payload = formatted_payload(response.model_dump(), indent)
-    click.echo(payload)
+    click.echo(formatted_payload(response.model_dump(), indent))
 
 
-def create_factory(model):
+def create_factory(model: type[Resource[Any]] | None) -> click.Command:
     if not model:
         raise ClickException("Invalid model")
 
@@ -42,7 +52,13 @@ def create_factory(model):
     )
     @from_pydantic("obj", model, exclude=exclude)
     @click.pass_context
-    def create_command(ctx, indent, obj: model, *args, **kwargs):
+    def create_command(
+        ctx: click.Context,
+        indent: bool,
+        obj: Resource[Any] | None,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         r"""Perform a `SCIM POST <https://www.rfc-editor.org/rfc/rfc7644#section-3.3>`_ request on resources endpoint.
 
         Input data can be passed through parameters like :code:`--external-id`.
@@ -92,7 +108,7 @@ def create_factory(model):
     default=True,
     help="Indent JSON response payloads.",
 )
-def create_cli(ctx, indent):
+def create_cli(ctx: click.Context, indent: bool) -> None:
     """Perform a `SCIM POST <https://www.rfc-editor.org/rfc/rfc7644#section-3.3>`_ request on resources endpoint.
 
     There are subcommands for all the available models, with dynamic attributes.

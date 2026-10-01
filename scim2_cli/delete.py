@@ -21,7 +21,7 @@ from .utils import formatted_payload
     help="Indent JSON response payloads.",
 )
 @click.pass_context
-def delete_cli(ctx, resource_type, id, indent):
+def delete_cli(ctx: click.Context, resource_type: str, id: str, indent: bool) -> None:
     """Perform a `SCIM DELETE query <https://www.rfc-editor.org/rfc/rfc7644#section-3.6>`_ request.
 
     .. code-block:: bash

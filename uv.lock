@@ -1367,7 +1367,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 bundle = [{ name = "pyinstaller", specifier = ">=6.10.0" }]
 dev = [
-    { name = "mypy", specifier = ">=1.13.0" },
+    { name = "mypy", specifier = ">=2.3.1" },
     { name = "prek", specifier = ">=0.1.0" },
     { name = "pytest", specifier = ">=8.2.1" },
     { name = "pytest-cov", specifier = ">=6.0.0" },

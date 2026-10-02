@@ -24,7 +24,7 @@ def httpserver(httpserver, simple_user_payload):
 
     httpserver.expect_request(
         "/Users",
-        query_string="attributes=userName&attributes=displayName&filter=userName+Eq+%22john%22&sortBy=userName&sortOrder=ascending&startIndex=1&count=10",
+        query_string="attributes=userName%2CdisplayName&filter=userName+Eq+%22john%22&sortBy=userName&sortOrder=ascending&startIndex=1&count=10",
         method="GET",
     ).respond_with_json(
         {

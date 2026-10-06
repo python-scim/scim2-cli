@@ -18,6 +18,7 @@ scim2-client = false
 scim2-models = false
 scim2-server = false
 scim2-tester = false
+sphinx-click-rst-to-ansi-formatter = false
 
 [[package]]
 name = "alabaster"
@@ -1361,7 +1362,7 @@ requires-dist = [
     { name = "pygments", specifier = ">=2.18.0" },
     { name = "scim2-client", extras = ["httpx2"], specifier = ">=0.11.2" },
     { name = "scim2-tester", specifier = ">=0.4.0" },
-    { name = "sphinx-click-rst-to-ansi-formatter", specifier = ">=0.1.0" },
+    { name = "sphinx-click-rst-to-ansi-formatter", specifier = ">=0.2.0" },
 ]
 
 [package.metadata.requires-dev]
@@ -1540,16 +1541,16 @@ wheels = [
 
 [[package]]
 name = "sphinx-click-rst-to-ansi-formatter"
-version = "0.1.5"
+version = "0.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
     { name = "colorama" },
     { name = "docutils" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/3a/ec/419a2e28c62c4b7fb480ace4901a60b847e55df5cf9df13f48c1389ace85/sphinx_click_rst_to_ansi_formatter-0.1.5.tar.gz", hash = "sha256:bfe08ba7bdb87949bafa55b92a17985c14fdcef2aa195c657adedd42c9266943", size = 9084, upload-time = "2025-05-16T18:50:54.512Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b1/70/bb3bb12d0dea88b9ad91bb0dbef3f61d207a51a5647f2b03027141766b73/sphinx_click_rst_to_ansi_formatter-0.2.0.tar.gz", hash = "sha256:1c1e86390c71533ae4ee34d6794cf38760cbd2633e5ba7a47db887284f02c821", size = 9381, upload-time = "2026-10-06T15:46:18.41Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/29/c7/188d4159a64b38a6bcc187496a1d916fbe907dc7947eaa916e8328806c33/sphinx_click_rst_to_ansi_formatter-0.1.5-py3-none-any.whl", hash = "sha256:8da4f92c9f296e28cc3c3600ac8579ef4be5c2c0838001d3fdeaccddc5223a85", size = 10495, upload-time = "2025-05-16T18:50:53.142Z" },
+    { url = "https://files.pythonhosted.org/packages/b6/ec/3920c0544e6631d8b44623bbe7206dd40beb31d5c0b4eb8205e7c5ac756d/sphinx_click_rst_to_ansi_formatter-0.2.0-py3-none-any.whl", hash = "sha256:5e5c13d026ab24f9bb3f3c7ea744e0ef7f98cf483f54eecd6231d150064dfefa", size = 10813, upload-time = "2026-10-06T15:46:17.281Z" },
 ]
 
 [[package]]

@@ -2,7 +2,6 @@ import json
 import re
 from collections.abc import Callable
 from enum import StrEnum
-from typing import TYPE_CHECKING
 from typing import Any
 
 import click
@@ -12,7 +11,7 @@ from scim2_models import Context
 from scim2_models import Mutability
 from scim2_models import Resource
 from scim2_models import SCIMException
-from sphinx_click.rst_to_ansi_formatter import make_rst_to_ansi_formatter
+from sphinx_click.rst_to_ansi_formatter import RstToAnsiGroup
 
 DOC_URL = "https://scim2-cli.readthedocs.io/"
 INDENTATION_SIZE = 4
@@ -82,15 +81,10 @@ def split_headers(headers: list[str]) -> dict[str, str]:
     }
 
 
-# mypy cannot subclass a class built at runtime by a factory.
-if TYPE_CHECKING:
-    RSTCommand = click.Group
-else:
-    RSTCommand = make_rst_to_ansi_formatter(DOC_URL, group=True)
-
-
-class ModelCommand(RSTCommand):
+class ModelCommand(RstToAnsiGroup):
     """CLI commands that takes a model subcommand."""
+
+    base_url = DOC_URL
 
     def __init__(
         self,

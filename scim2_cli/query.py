@@ -61,7 +61,7 @@ DISCOVERY_MODELS = (Schema, ResourceType, ServiceProviderConfig)
     "--sort-order",
     help="A string indicating the order in which the “sortBy” parameter is applied.",
 )
-@me_option
+@me_option()
 @click.option(
     "--indent/--no-indent",
     is_flag=True,

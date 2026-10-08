@@ -1357,7 +1357,7 @@ doc = [
 
 [package.metadata]
 requires-dist = [
-    { name = "click", specifier = ">=8.1.7" },
+    { name = "click", specifier = ">=8.5.0" },
     { name = "pydanclick", specifier = ">=0.5.0" },
     { name = "pygments", specifier = ">=2.18.0" },
     { name = "scim2-client", extras = ["httpx2"], specifier = ">=0.13.0" },

@@ -23,13 +23,32 @@ INDENTATION_SIZE = 4
 SCIM_EXCEPTIONS = (SCIMClientException, SCIMException)
 
 T = TypeVar("T")
+F = TypeVar("F", bound=Callable[..., Any])
 
-me_option = click.option(
-    "--me",
-    is_flag=True,
-    default=False,
-    help="Act on the resource of the authenticated client, under /Me (RFC 7644 §3.11).",
-)
+COMMAND_OPTIONS = {"me", "indent", "no-indent", "help"}
+
+
+def me_option(*param_decls: str) -> Callable[[F], F]:
+    """Add the --me option, with an optional parameter name."""
+    return click.option(
+        "--me",
+        *param_decls,
+        is_flag=True,
+        default=False,
+        help="Act on the resource of the authenticated client, under /Me (RFC 7644 §3.11).",
+    )
+
+
+def indent_option(*param_decls: str) -> Callable[[F], F]:
+    """Add the --indent option, with an optional parameter name."""
+    return click.option(
+        "--indent/--no-indent",
+        *param_decls,
+        is_flag=True,
+        default=True,
+        help="Indent JSON response payloads.",
+    )
+
 
 CONTROL_CHARACTERS = re.compile(
     "[\x00-\x08\x0b-\x1f\x7f-\x9f\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]"
@@ -175,6 +194,16 @@ def unacceptable_fields(context: Context, model: type[BaseModel]) -> list[str]:
     ]
     excluded.append("schemas")
     return excluded
+
+
+def renamed_fields(model: type[BaseModel], exclude: list[str]) -> dict[str, str]:
+    """Rename the options of the attributes that collide with the options of the command."""
+    return {
+        field_name: f"--{option}-attribute"
+        for field_name in model.model_fields
+        if field_name not in exclude
+        and (option := field_name.replace("_", "-")) in COMMAND_OPTIONS
+    }
 
 
 def exception_to_click_error(exception: Exception) -> click.ClickException:

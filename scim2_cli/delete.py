@@ -17,7 +17,7 @@ from .utils import formatted_payload
 @click.command(cls=make_rst_to_ansi_formatter(DOC_URL), name="delete")
 @click.argument("resource-type", required=False)
 @click.argument("id", required=False)
-@me_option
+@me_option()
 @click.option(
     "--indent/--no-indent",
     is_flag=True,

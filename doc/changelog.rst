@@ -18,6 +18,7 @@ Added
 Changed
 ^^^^^^^
 - scim2-client 0.13.0 is now the minimum supported version.
+- click 8.5.0 is now the minimum supported version.
 - The commands are named after the resource types of the server, instead of their models.
   Each resource type has its own command, even when several ones share a schema:
   ``scim2 query employee 1`` reads ``/Employees/1`` next to ``scim2 query user 1``.
@@ -27,6 +28,9 @@ Changed
 
 Fixed
 ^^^^^
+- The attributes named ``me``, ``indent`` or ``help`` get the ``--me-attribute``,
+  ``--indent-attribute`` and ``--help-attribute`` options in ``create`` and ``replace``.
+  They used to collide with the options of the command.
 - ``search`` no longer sends empty ``attributes`` and ``excludedAttributes``
   when ``--attribute`` and ``--excluded-attribute`` are not passed.
 

@@ -18,7 +18,9 @@ from scim2_cli.utils import command_name
 from scim2_cli.utils import escape_options_help
 from scim2_cli.utils import exception_to_click_error
 from scim2_cli.utils import formatted_payload
+from scim2_cli.utils import indent_option
 from scim2_cli.utils import me_option
+from scim2_cli.utils import renamed_fields
 from scim2_cli.utils import unacceptable_fields
 
 
@@ -53,19 +55,14 @@ def create_factory(
         cls=make_rst_to_ansi_formatter(DOC_URL),
         name=command_name(resource_type),
     )
-    @click.option(
-        "--indent/--no-indent",
-        is_flag=True,
-        default=True,
-        help="Indent JSON response payloads.",
-    )
-    @me_option
-    @from_pydantic("obj", model, exclude=exclude)
+    @indent_option("cli_indent")
+    @me_option("cli_me")
+    @from_pydantic("obj", model, exclude=exclude, rename=renamed_fields(model, exclude))
     @click.pass_context
     def create_command(
         ctx: click.Context,
-        indent: bool,
-        me: bool,
+        cli_indent: bool,
+        cli_me: bool,
         obj: Resource[Any] | None,
         *args: Any,
         **kwargs: Any,
@@ -112,8 +109,8 @@ def create_factory(
             ctx.obj["client"],
             resource_type,
             payload,
-            indent,
-            me or ctx.obj.get("me", False),
+            cli_indent,
+            cli_me or ctx.obj.get("me", False),
         )
 
     return escape_options_help(create_command)
@@ -126,14 +123,9 @@ def create_factory(
     invoke_without_command=True,
 )
 @click.pass_context
-@click.option(
-    "--indent/--no-indent",
-    is_flag=True,
-    default=True,
-    help="Indent JSON response payloads.",
-)
-@me_option
-def create_cli(ctx: click.Context, indent: bool, me: bool) -> None:
+@indent_option("cli_indent")
+@me_option("cli_me")
+def create_cli(ctx: click.Context, cli_indent: bool, cli_me: bool) -> None:
     """Perform a `SCIM POST <https://www.rfc-editor.org/rfc/rfc7644#section-3.3>`_ request on resources endpoint.
 
     There are subcommands for all the resource types of the server, with dynamic attributes.
@@ -154,7 +146,7 @@ def create_cli(ctx: click.Context, indent: bool, me: bool) -> None:
 
     """
     if ctx.invoked_subcommand is not None:
-        ctx.obj["me"] = me
+        ctx.obj["me"] = cli_me
         return
 
     payload = ctx.obj.get("stdin")
@@ -162,4 +154,4 @@ def create_cli(ctx: click.Context, indent: bool, me: bool) -> None:
         click.echo(ctx.get_help())
         ctx.exit(1)
 
-    create_payload(ctx.obj["client"], None, payload, indent, me)
+    create_payload(ctx.obj["client"], None, payload, cli_indent, cli_me)

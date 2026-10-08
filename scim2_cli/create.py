@@ -3,6 +3,7 @@ from typing import cast
 
 import click
 from pydanclick import from_pydantic
+from scim2_client import Me
 from scim2_client.engines.httpx2 import SyncSCIMClient
 from scim2_models import Context
 from scim2_models import Error
@@ -17,6 +18,7 @@ from scim2_cli.utils import command_name
 from scim2_cli.utils import escape_options_help
 from scim2_cli.utils import exception_to_click_error
 from scim2_cli.utils import formatted_payload
+from scim2_cli.utils import me_option
 from scim2_cli.utils import unacceptable_fields
 
 
@@ -25,12 +27,15 @@ def create_payload(
     resource_type: ResourceType | None,
     payload: Resource[Any] | dict[str, Any],
     indent: bool,
+    me: bool,
 ) -> None:
     try:
         # Response payloads are always checked, so the client never returns a dict.
         response = cast(
             "Resource[Any] | Error",
-            client.create(resource_type, payload, raise_scim_errors=False),
+            client.create(
+                Me if me else resource_type, payload, raise_scim_errors=False
+            ),
         )
 
     except SCIM_EXCEPTIONS as scim_exc:
@@ -54,11 +59,13 @@ def create_factory(
         default=True,
         help="Indent JSON response payloads.",
     )
+    @me_option
     @from_pydantic("obj", model, exclude=exclude)
     @click.pass_context
     def create_command(
         ctx: click.Context,
         indent: bool,
+        me: bool,
         obj: Resource[Any] | None,
         *args: Any,
         **kwargs: Any,
@@ -85,6 +92,13 @@ def create_factory(
 
             echo '{"userName": "bjensen@example.com", "schemas": ["urn:ietf:params:scim:schemas:core:2.0:User"]}' |  create user
 
+        With :code:`--me`, the request is made on the :code:`/Me` endpoint,
+        and the server chooses the resource type:
+
+        .. code-block:: bash
+
+            scim create user --me --user-name "foo"
+
         """
         if obj == model():
             obj = None
@@ -94,7 +108,13 @@ def create_factory(
             click.echo(ctx.get_help())
             ctx.exit(1)
 
-        create_payload(ctx.obj["client"], resource_type, payload, indent)
+        create_payload(
+            ctx.obj["client"],
+            resource_type,
+            payload,
+            indent,
+            me or ctx.obj.get("me", False),
+        )
 
     return escape_options_help(create_command)
 
@@ -112,7 +132,8 @@ def create_factory(
     default=True,
     help="Indent JSON response payloads.",
 )
-def create_cli(ctx: click.Context, indent: bool) -> None:
+@me_option
+def create_cli(ctx: click.Context, indent: bool, me: bool) -> None:
     """Perform a `SCIM POST <https://www.rfc-editor.org/rfc/rfc7644#section-3.3>`_ request on resources endpoint.
 
     There are subcommands for all the resource types of the server, with dynamic attributes.
@@ -128,8 +149,12 @@ def create_cli(ctx: click.Context, indent: bool) -> None:
 
         echo '{"userName": "bjensen@example.com", "schemas": ["urn:ietf:params:scim:schemas:core:2.0:User"]}' |  create
 
+    With :code:`--me`, the request is made on the :code:`/Me` endpoint,
+    and the server chooses the resource type.
+
     """
     if ctx.invoked_subcommand is not None:
+        ctx.obj["me"] = me
         return
 
     payload = ctx.obj.get("stdin")
@@ -137,4 +162,4 @@ def create_cli(ctx: click.Context, indent: bool) -> None:
         click.echo(ctx.get_help())
         ctx.exit(1)
 
-    create_payload(ctx.obj["client"], None, payload, indent)
+    create_payload(ctx.obj["client"], None, payload, indent, me)

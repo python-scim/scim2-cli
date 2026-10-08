@@ -2,6 +2,7 @@ from typing import Any
 
 import click
 from click import ClickException
+from scim2_client import Me
 from scim2_models import Resource
 from scim2_models import ResourceType
 from scim2_models import ResponseParameters
@@ -12,6 +13,7 @@ from sphinx_click.rst_to_ansi_formatter import make_rst_to_ansi_formatter
 
 from scim2_cli.utils import exception_to_click_error
 from scim2_cli.utils import find_target
+from scim2_cli.utils import me_option
 
 from .utils import DOC_URL
 from .utils import SCIM_EXCEPTIONS
@@ -59,6 +61,7 @@ DISCOVERY_MODELS = (Schema, ResourceType, ServiceProviderConfig)
     "--sort-order",
     help="A string indicating the order in which the “sortBy” parameter is applied.",
 )
+@me_option
 @click.option(
     "--indent/--no-indent",
     is_flag=True,
@@ -77,6 +80,7 @@ def query_cli(
     filter: str | None,
     sort_by: str | None,
     sort_order: str | None,
+    me: bool,
     indent: bool,
 ) -> None:
     """Perform a `SCIM GET <https://www.rfc-editor.org/rfc/rfc7644#section-3.4.1>`_ request on the :code:`RESOURCE_TYPE` endpoint.
@@ -84,6 +88,7 @@ def query_cli(
     - If :code:`RESOURCE_TYPE` is :code:`user` and :code:`id` is `1234`, then the request will made on the :code:`/Users/1234` endpoint.
     - If :code:`RESOURCE_TYPE` is :code:`user` and :code:`id` is not set, then the request will made on the :code:`/Users` endpoint.
     - If :code:`RESOURCE_TYPE` is not set, then the request will made on the :code:`/` endpoint.
+    - If :code:`--me` is set, then the request will be made on the :code:`/Me` endpoint.
 
     When a single resource is queried, only :code:`--attribute` and :code:`--excluded-attribute` are
     available, as defined in `RFC7644 §3.4.1 <https://www.rfc-editor.org/rfc/rfc7644#section-3.4.1>`_.
@@ -95,6 +100,9 @@ def query_cli(
         echo '{"startIndex": 50, "count": 10}' |  query user
 
     """
+    if me and (resource_type or id):
+        raise ClickException("--me cannot be used with a resource type or an id.")
+
     target: ResourceType | type[Resource[Any]] | None = None
     if resource_type:
         targets: dict[str, ResourceType | type[Resource[Any]]] = {
@@ -103,7 +111,7 @@ def query_cli(
         }
         target = find_target(targets, resource_type)
 
-    single_resource = bool(id) or target is ServiceProviderConfig
+    single_resource = me or bool(id) or target is ServiceProviderConfig
     listing_options = [
         name
         for name, value in (
@@ -151,7 +159,7 @@ def query_cli(
 
     try:
         response = ctx.obj["client"].query(
-            target,
+            Me if me else target,
             id,
             query_parameters=payload,
             check_request_payload=check_request_payload,

@@ -104,6 +104,8 @@ Use the :ref:`reference:query` and :ref:`reference:search` commands to look for 
 Both commands take similar options such as :option:`--count <scim-query --count>` or :option:`--attribute <scim-query --attribute>`.
 An exhaustive list of options can be found on the :doc:`reference`.
 :ref:`reference:query` can also take a :option:`RESOURCE_TYPE <scim-query RESOURCE_TYPE>` and a :option:`ID <scim-query ID>` parameters.
+:option:`RESOURCE_TYPE <scim-query RESOURCE_TYPE>` is the name of a resource type of the server, in any case, such as ``user`` or ``group``.
+:ref:`reference:search` takes an optional :option:`RESOURCE_TYPE <scim-search RESOURCE_TYPE>` too.
 
 - If none are set, all the resources of the server are queried.
 
@@ -196,6 +198,25 @@ The :ref:`reference:delete` command allows you to delete resources.
    :caption: Deletion of an user.
 
    $ scim delete user 38b044dd95624c4186f5614fca30305d
+
+Act on the authenticated client
+-------------------------------
+
+Pass :option:`--me <scim-query --me>` to :ref:`reference:query`, :ref:`reference:create`, :ref:`reference:replace` or :ref:`reference:delete`
+to act on the resource of the authenticated client, under ``/Me``.
+The server answers with a ``501`` error if it does not support ``/Me``.
+
+.. code-block:: console
+   :caption: Reading the resource of the authenticated client.
+
+   $ scim query --me
+
+:ref:`reference:replace` needs no ``--id`` with ``--me``:
+
+.. code-block:: console
+   :caption: Replacing the resource of the authenticated client.
+
+   $ scim replace user --me --user-name bjensen@example.com
 
 Perform a SCIM compliance test
 ------------------------------

@@ -6,6 +6,9 @@ Changelog
 
 Added
 ^^^^^
+- ``--me`` on ``query``, ``create``, ``replace`` and ``delete`` sends the request to ``/Me``,
+  the resource of the authenticated client (:rfc:`7644#section-3.11`).
+  ``scim2 replace user --me`` needs no ``--id``.
 - ``search`` takes an optional resource type. ``scim2 search user`` sends the search to
   ``/Users/.search``.
 - ``--cursor`` on ``query`` and ``search``, for cursor-based pagination (:rfc:`9865`).

@@ -1,8 +1,12 @@
 Changelog
 =========
 
-[Unreleased]
-------------
+[0.4.1] - 2026-10-08
+--------------------
+
+Added
+^^^^^
+- A container image is published on the GitHub container registry for each release.
 
 Added
 ^^^^^

@@ -4,6 +4,10 @@ Changelog
 [Unreleased]
 ------------
 
+Added
+^^^^^
+- A container image is published on the GitHub container registry for each release.
+
 Changed
 ^^^^^^^
 - The code is checked with mypy in strict mode.

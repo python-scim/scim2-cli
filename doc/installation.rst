@@ -67,6 +67,45 @@ Installation
          $ chmod +x scim2
          $ ./scim2 --help
 
+   .. tab-item:: :iconify:`devicon:docker` Container
+      :sync: container
+
+      Each release publishes an image on the `GitHub container registry <https://github.com/python-scim/scim2-cli/pkgs/container/scim2-cli>`_.
+      The arguments are passed to ``scim2``:
+
+      .. code-block:: console
+
+         $ docker run --rm ghcr.io/python-scim/scim2-cli --help
+
+      Pass the server URL and the headers with environment variables.
+      Pass ``--interactive`` to send JSON on stdin:
+
+      .. code-block:: console
+
+         $ echo '{"schemas": ["urn:ietf:params:scim:schemas:core:2.0:User"], "userName": "bjensen"}' | \
+             docker run --rm --interactive \
+             --env SCIM_CLI_URL=https://auth.example/scim/v2 \
+             --env SCIM_CLI_HEADERS="Authorization: Bearer 12345" \
+             ghcr.io/python-scim/scim2-cli create
+
+      The working directory in the container is ``/work``.
+      Mount the current directory there to read files with relative paths:
+
+      .. code-block:: console
+
+         $ docker run --rm --user "$(id -u):$(id -g)" --volume "$PWD:/work" \
+             --env SCIM_CLI_URL=https://auth.example/scim/v2 \
+             ghcr.io/python-scim/scim2-cli --schemas schemas.json search user
+
+      To check the compliance of a server in a CI pipeline, run the :ref:`reference:test` command:
+
+      .. code-block:: console
+
+         $ docker run --rm --env SCIM_CLI_URL=https://auth.example/scim/v2 ghcr.io/python-scim/scim2-cli test
+
+      A server running on the host is not reachable at ``localhost`` from the container.
+      Pass ``--network host``, or run both containers on the same network.
+
    .. tab-item:: :iconify:`devicon:git` Sources
       :sync: sources
 
@@ -93,3 +132,10 @@ Installation
          $ uv sync --group bundle
          $ uv run pyinstaller scim2.spec
          $ ./dist/scim2 --help
+
+      Or build the container image:
+
+      .. code-block:: console
+
+         $ docker build --file Containerfile --tag scim2-cli .
+         $ docker run --rm scim2-cli --help

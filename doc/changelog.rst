@@ -1,12 +1,15 @@
 Changelog
 =========
 
-[0.4.1] - 2026-10-08
+[0.5.0] - Unreleased
 --------------------
 
-Added
-^^^^^
-- A container image is published on the GitHub container registry for each release.
+Changed
+^^^^^^^
+- scim2-client 0.13.0 is now the minimum supported version.
+
+[0.4.1] - 2026-10-08
+--------------------
 
 Added
 ^^^^^

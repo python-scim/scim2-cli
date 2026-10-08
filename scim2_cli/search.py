@@ -91,8 +91,8 @@ def search_cli(
         check_request_payload = True
         payload = SearchRequest.model_validate(
             {
-                "attributes": attribute,
-                "excluded_attributes": excluded_attribute,
+                "attributes": attribute or None,
+                "excluded_attributes": excluded_attribute or None,
                 "start_index": start_index,
                 "cursor": cursor,
                 "count": count,

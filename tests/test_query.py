@@ -407,3 +407,32 @@ def test_cursor_on_a_single_resource(runner, httpserver):
         "Error: --cursor cannot be used when querying a single resource."
         in result.output
     )
+
+
+@pytest.mark.parametrize("arguments", [["user"], ["user", "1"]])
+def test_unset_attributes_are_not_sent(
+    runner, httpserver, simple_user_payload, arguments
+):
+    """Without --attribute and --excluded-attribute, the query string has none."""
+    path = "/" + "/".join(["Users", *arguments[1:]])
+    payload = (
+        simple_user_payload("1")
+        if len(arguments) > 1
+        else {
+            "schemas": ["urn:ietf:params:scim:api:messages:2.0:ListResponse"],
+            "totalResults": 0,
+            "Resources": [],
+        }
+    )
+    httpserver.expect_oneshot_request(
+        path, query_string="", method="GET"
+    ).respond_with_json(payload, content_type="application/scim+json")
+
+    result = runner.invoke(
+        cli,
+        ["--url", httpserver.url_for("/"), "query", *arguments],
+        catch_exceptions=False,
+    )
+
+    assert result.exit_code == 0, result.output
+    assert httpserver.log[-1][0].query_string == b""

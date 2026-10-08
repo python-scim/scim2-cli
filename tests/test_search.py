@@ -180,3 +180,33 @@ def test_cursor(runner, httpserver, simple_user_payload):
 
     assert result.exit_code == 0, result.output
     assert json.loads(result.output)["nextCursor"] == "YkU3OF86Pz0rGv"
+
+
+def test_unset_attributes_are_not_sent(runner, httpserver, simple_user_payload):
+    """Without --attribute and --excluded-attribute, the search request has none."""
+
+    def handler(request):
+        assert "attributes" not in request.json
+        assert "excludedAttributes" not in request.json
+        return Response(
+            json.dumps(
+                {
+                    "schemas": ["urn:ietf:params:scim:api:messages:2.0:ListResponse"],
+                    "totalResults": 0,
+                    "Resources": [],
+                }
+            ),
+            content_type="application/scim+json",
+        )
+
+    httpserver.expect_oneshot_request(
+        "/Users/.search", method="POST"
+    ).respond_with_handler(handler)
+
+    result = runner.invoke(
+        cli,
+        ["--url", httpserver.url_for("/"), "search", "user", "--count", "1"],
+        catch_exceptions=False,
+    )
+
+    assert result.exit_code == 0, result.output

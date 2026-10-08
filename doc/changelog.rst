@@ -25,6 +25,11 @@ Changed
   The resource type can be typed with any case.
 - An unknown subcommand of ``create`` and ``replace`` is reported as a usage error.
 
+Fixed
+^^^^^
+- ``search`` no longer sends empty ``attributes`` and ``excludedAttributes``
+  when ``--attribute`` and ``--excluded-attribute`` are not passed.
+
 [0.4.1] - 2026-10-08
 --------------------
 

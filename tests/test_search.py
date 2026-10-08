@@ -141,3 +141,42 @@ def test_search_an_unknown_resource_type(runner, httpserver):
     assert (
         "Unknown resource type 'invalid'. Available values are: user" in result.output
     )
+
+
+def test_cursor(runner, httpserver, simple_user_payload):
+    """The cursor is sent in the search request (RFC 9865)."""
+
+    def handler(request):
+        assert request.json["cursor"] == "VZUTiyhEQJ94IR"
+        return Response(
+            json.dumps(
+                {
+                    "schemas": ["urn:ietf:params:scim:api:messages:2.0:ListResponse"],
+                    "totalResults": 2,
+                    "itemsPerPage": 1,
+                    "nextCursor": "YkU3OF86Pz0rGv",
+                    "Resources": [simple_user_payload("cursor")],
+                }
+            ),
+            content_type="application/scim+json",
+        )
+
+    httpserver.expect_oneshot_request(
+        "/Users/.search", method="POST"
+    ).respond_with_handler(handler)
+
+    result = runner.invoke(
+        cli,
+        [
+            "--url",
+            httpserver.url_for("/"),
+            "search",
+            "user",
+            "--cursor",
+            "VZUTiyhEQJ94IR",
+        ],
+        catch_exceptions=False,
+    )
+
+    assert result.exit_code == 0, result.output
+    assert json.loads(result.output)["nextCursor"] == "YkU3OF86Pz0rGv"

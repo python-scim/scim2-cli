@@ -357,3 +357,53 @@ def test_service_provider_config(runner, httpserver):
         "urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig"
     ]
     assert json_output["documentationUri"] == "https://scim.test"
+
+
+@pytest.mark.parametrize("cursor", ["", "VZUTiyhEQJ94IR"])
+def test_cursor(runner, httpserver, simple_user_payload, cursor):
+    """The cursor is sent to read a page of a cursor-based pagination (RFC 9865)."""
+    httpserver.expect_oneshot_request(
+        "/Users", query_string=f"cursor={cursor}&count=1", method="GET"
+    ).respond_with_json(
+        {
+            "schemas": ["urn:ietf:params:scim:api:messages:2.0:ListResponse"],
+            "totalResults": 2,
+            "itemsPerPage": 1,
+            "nextCursor": "YkU3OF86Pz0rGv",
+            "Resources": [simple_user_payload("cursor")],
+        },
+        content_type="application/scim+json",
+    )
+
+    result = runner.invoke(
+        cli,
+        [
+            "--url",
+            httpserver.url_for("/"),
+            "query",
+            "user",
+            "--cursor",
+            cursor,
+            "--count",
+            "1",
+        ],
+        catch_exceptions=False,
+    )
+
+    assert result.exit_code == 0, result.output
+    assert json.loads(result.output)["nextCursor"] == "YkU3OF86Pz0rGv"
+
+
+def test_cursor_on_a_single_resource(runner, httpserver):
+    """A cursor is refused when an id is passed."""
+    result = runner.invoke(
+        cli,
+        ["--url", httpserver.url_for("/"), "query", "user", "1", "--cursor", ""],
+        catch_exceptions=False,
+    )
+
+    assert result.exit_code == 1, result.output
+    assert (
+        "Error: --cursor cannot be used when querying a single resource."
+        in result.output
+    )

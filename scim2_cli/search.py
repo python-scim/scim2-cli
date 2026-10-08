@@ -29,6 +29,10 @@ from .utils import formatted_payload
     help="An integer indicating the 1-based index of the first query result.",
 )
 @click.option(
+    "--cursor",
+    help="The cursor of the page to read, for cursor-based pagination (RFC 9865). Pass an empty value to read the first page.",
+)
+@click.option(
     "--count",
     type=int,
     help="An integer indicating the desired maximum number of query results per page.",
@@ -56,6 +60,7 @@ def search_cli(
     attribute: list[str],
     excluded_attribute: list[str],
     start_index: int | None,
+    cursor: str | None,
     count: int | None,
     filter: str | None,
     sort_by: str | None,
@@ -89,6 +94,7 @@ def search_cli(
                 "attributes": attribute,
                 "excluded_attributes": excluded_attribute,
                 "start_index": start_index,
+                "cursor": cursor,
                 "count": count,
                 "filter": filter,
                 "sort_by": sort_by,

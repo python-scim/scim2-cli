@@ -8,6 +8,9 @@ Added
 ^^^^^
 - ``search`` takes an optional resource type. ``scim2 search user`` sends the search to
   ``/Users/.search``.
+- ``--cursor`` on ``query`` and ``search``, for cursor-based pagination (:rfc:`9865`).
+  An empty value reads the first page. The response gives the cursor of the next page in
+  ``nextCursor``.
 
 Changed
 ^^^^^^^

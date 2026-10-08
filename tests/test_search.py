@@ -106,3 +106,38 @@ def test_scimclient_error(runner, httpserver, simple_user_payload):
     )
     assert result.exit_code == 1, result.output
     assert "Unexpected response status code: 666" in result.output
+
+
+def test_search_a_resource_type(runner, httpserver, simple_user_payload):
+    """A resource type restricts the search to its endpoint."""
+    httpserver.expect_request("/Users/.search", method="POST").respond_with_json(
+        {
+            "schemas": ["urn:ietf:params:scim:api:messages:2.0:ListResponse"],
+            "totalResults": 1,
+            "Resources": [simple_user_payload("user")],
+        },
+        content_type="application/scim+json",
+    )
+
+    result = runner.invoke(
+        cli,
+        ["--url", httpserver.url_for("/"), "search", "user"],
+        catch_exceptions=False,
+    )
+
+    assert result.exit_code == 0, result.output
+    assert json.loads(result.output)["Resources"][0]["id"] == "user"
+
+
+def test_search_an_unknown_resource_type(runner, httpserver):
+    """An unknown resource type is reported with the available ones."""
+    result = runner.invoke(
+        cli,
+        ["--url", httpserver.url_for("/"), "search", "invalid"],
+        catch_exceptions=False,
+    )
+
+    assert result.exit_code == 1, result.output
+    assert (
+        "Unknown resource type 'invalid'. Available values are: user" in result.output
+    )

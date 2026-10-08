@@ -4,6 +4,11 @@ Changelog
 [0.5.0] - Unreleased
 --------------------
 
+Added
+^^^^^
+- ``search`` takes an optional resource type. ``scim2 search user`` sends the search to
+  ``/Users/.search``.
+
 Changed
 ^^^^^^^
 - scim2-client 0.13.0 is now the minimum supported version.

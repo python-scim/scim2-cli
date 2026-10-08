@@ -3,6 +3,7 @@ from scim2_models import SearchRequest
 from sphinx_click.rst_to_ansi_formatter import make_rst_to_ansi_formatter
 
 from scim2_cli.utils import exception_to_click_error
+from scim2_cli.utils import find_target
 
 from .utils import DOC_URL
 from .utils import SCIM_EXCEPTIONS
@@ -11,6 +12,7 @@ from .utils import formatted_payload
 
 @click.command(cls=make_rst_to_ansi_formatter(DOC_URL), name="search")
 @click.pass_context
+@click.argument("resource_type", required=False)
 @click.option(
     "--attribute",
     multiple=True,
@@ -50,6 +52,7 @@ from .utils import formatted_payload
 )
 def search_cli(
     ctx: click.Context,
+    resource_type: str | None,
     attribute: list[str],
     excluded_attribute: list[str],
     start_index: int | None,
@@ -59,7 +62,10 @@ def search_cli(
     sort_order: str | None,
     indent: bool,
 ) -> None:
-    """Perform a `SCIM GET <https://www.rfc-editor.org/rfc/rfc7644#section-3.4.1>`_ request on the :code:`/.search` endpoint.
+    """Perform a `SCIM POST search <https://www.rfc-editor.org/rfc/rfc7644#section-3.4.3>`_ request.
+
+    - If :code:`RESOURCE_TYPE` is :code:`user`, then the request will be made on the :code:`/Users/.search` endpoint.
+    - If :code:`RESOURCE_TYPE` is not set, then the request will be made on the :code:`/.search` endpoint.
 
     Data passed in JSON format to stdin is sent as request arguments and all the other query arguments are ignored:
 
@@ -68,6 +74,10 @@ def search_cli(
         echo '{"startIndex": 50, "count": 10}' |  search user
 
     """
+    target = (
+        find_target(ctx.obj["resource_types"], resource_type) if resource_type else None
+    )
+
     if ctx.obj.get("stdin"):
         check_request_payload = False
         payload = ctx.obj.get("stdin")
@@ -88,6 +98,7 @@ def search_cli(
 
     try:
         response = ctx.obj["client"].search(
+            target,
             search_request=payload,
             check_request_payload=check_request_payload,
             raise_scim_errors=False,

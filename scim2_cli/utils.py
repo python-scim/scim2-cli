@@ -5,9 +5,11 @@ from collections.abc import Mapping
 from enum import StrEnum
 from typing import Any
 from typing import TypeVar
+from typing import cast
 
 import click
 from click import ClickException
+from click.core import ParameterSource
 from scim2_client import SCIMClientException
 from scim2_models import BaseModel
 from scim2_models import Context
@@ -113,6 +115,14 @@ def find_target(targets: Mapping[str, T], name: str) -> T:
             f"Unknown resource type '{escape_control_characters(name)}'. "
             f"Available values are: {ok_values}"
         ) from exc
+
+
+def inherited(ctx: click.Context, name: str, value: T) -> T:
+    """Read an option of a subcommand, or else the one passed to its parent command."""
+    parent = ctx.parent
+    if parent is None or ctx.get_parameter_source(name) is not ParameterSource.DEFAULT:
+        return value
+    return cast(T, parent.params[name])
 
 
 def formatted_payload(obj: Any, indent: bool) -> str:

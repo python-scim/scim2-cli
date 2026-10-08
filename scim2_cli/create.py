@@ -19,6 +19,7 @@ from scim2_cli.utils import escape_options_help
 from scim2_cli.utils import exception_to_click_error
 from scim2_cli.utils import formatted_payload
 from scim2_cli.utils import indent_option
+from scim2_cli.utils import inherited
 from scim2_cli.utils import me_option
 from scim2_cli.utils import renamed_fields
 from scim2_cli.utils import unacceptable_fields
@@ -109,8 +110,8 @@ def create_factory(
             ctx.obj["client"],
             resource_type,
             payload,
-            cli_indent,
-            cli_me or ctx.obj.get("me", False),
+            inherited(ctx, "cli_indent", cli_indent),
+            inherited(ctx, "cli_me", cli_me),
         )
 
     return escape_options_help(create_command)
@@ -146,7 +147,6 @@ def create_cli(ctx: click.Context, cli_indent: bool, cli_me: bool) -> None:
 
     """
     if ctx.invoked_subcommand is not None:
-        ctx.obj["me"] = cli_me
         return
 
     payload = ctx.obj.get("stdin")

@@ -28,6 +28,8 @@ Changed
 
 Fixed
 ^^^^^
+- ``--no-indent`` passed to ``create`` or ``replace`` before the resource type applies.
+  It used to be ignored.
 - The attributes named ``me``, ``indent`` or ``help`` get the ``--me-attribute``,
   ``--indent-attribute`` and ``--help-attribute`` options in ``create`` and ``replace``.
   They used to collide with the options of the command.

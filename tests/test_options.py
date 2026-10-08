@@ -82,3 +82,54 @@ def test_renamed_attribute_options_fill_the_attributes(
     assert result.exit_code == 0, result.output
     assert len(result.output.splitlines()) == 1
     assert json.loads(result.output) == {**payload, "id": "1"}
+
+
+@pytest.mark.parametrize(
+    ("command", "method", "path"),
+    [("create", "POST", "/Users"), ("replace", "PUT", "/Users/1")],
+)
+@pytest.mark.parametrize(
+    ("options", "indented"),
+    [
+        (["--no-indent", "user"], False),
+        (["--no-indent", "user", "--indent"], True),
+        (["user", "--no-indent"], False),
+        (["user"], True),
+    ],
+    ids=["command", "subcommand-wins", "subcommand", "default"],
+)
+def test_indent_passed_to_the_command(
+    runner, httpserver, simple_user_payload, command, method, path, options, indented
+):
+    """--indent applies when passed to the command, unless the subcommand overrides it."""
+    httpserver.expect_request(path, method=method).respond_with_json(
+        simple_user_payload("1"),
+        status=201 if command == "create" else 200,
+        content_type="application/scim+json",
+    )
+
+    result = runner.invoke(
+        cli,
+        [
+            "--url",
+            httpserver.url_for("/"),
+            command,
+            *options,
+            "--id",
+            "1",
+            "--user-name",
+            "1@example.com",
+        ]
+        if command == "replace"
+        else [
+            "--url",
+            httpserver.url_for("/"),
+            command,
+            *options,
+            "--user-name",
+            "1@example.com",
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert (len(result.output.splitlines()) > 1) == indented

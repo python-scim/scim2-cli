@@ -163,11 +163,22 @@ def test_resource_types_with_the_same_name_are_refused(invoke):
     assert "Two resource types share the name user" in result.output
 
 
-def test_resource_type_without_name_has_no_command(invoke):
-    """A resource type without a name cannot be designated."""
+def test_resource_type_without_name_is_named_after_its_id(invoke, httpserver, employee):
+    """A resource type without a name has a command named after its id."""
     nameless = EMPLOYEES.model_copy(update={"name": None})
+    respond(httpserver, "/Employees/1", "GET", employee)
 
-    result = invoke([USERS, nameless], "create", "--help")
+    result = invoke([USERS, nameless], "query", "employee", "1")
+
+    assert result.exit_code == 0, result.output
+    assert json.loads(result.output)["id"] == "1"
+
+
+def test_resource_type_without_name_nor_id_has_no_command(invoke):
+    """A resource type without a name nor an id cannot be designated."""
+    anonymous = EMPLOYEES.model_copy(update={"name": None, "id": None})
+
+    result = invoke([USERS, anonymous], "create", "--help")
 
     assert result.exit_code == 0, result.output
     assert "employee" not in result.output.lower()

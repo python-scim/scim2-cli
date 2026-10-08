@@ -20,6 +20,7 @@ Changed
 - scim2-client 0.13.0 is now the minimum supported version.
 - click 8.5.0 is now the minimum supported version.
 - The commands are named after the resource types of the server, instead of their models.
+  A resource type without a name is named after its id.
   Each resource type has its own command, even when several ones share a schema:
   ``scim2 query employee 1`` reads ``/Employees/1`` next to ``scim2 query user 1``.
   A resource type no longer needs to be named after its schema.

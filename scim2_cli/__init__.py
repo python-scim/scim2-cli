@@ -140,7 +140,7 @@ def cli(
     ctx.obj["resource_types"] = {
         command_name(resource_type): resource_type
         for resource_type in scim_client.provider.resource_types
-        if resource_type.name
+        if resource_type.name or resource_type.id
     }
 
     if not sys.stdin.isatty():  # pragma: no cover

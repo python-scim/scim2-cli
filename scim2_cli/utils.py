@@ -101,8 +101,8 @@ def escape_options_help(command: click.Command) -> click.Command:
 
 
 def command_name(resource_type: ResourceType) -> str:
-    """Name the commands acting on a resource type after it."""
-    return escape_control_characters(resource_type.name).lower()
+    """Name the commands acting on a resource type after its name, or else its id."""
+    return escape_control_characters(resource_type.name or resource_type.id).lower()
 
 
 def find_target(targets: Mapping[str, T], name: str) -> T:

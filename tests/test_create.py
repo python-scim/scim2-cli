@@ -15,14 +15,14 @@ def test_no_command(runner, httpserver):
 
 
 def test_invalid_command(runner, httpserver):
-    """Test invalid command."""
+    """An unknown resource type is not a subcommand."""
     result = runner.invoke(
         cli,
         ["--url", httpserver.url_for("/"), "create", "invalid"],
         catch_exceptions=False,
     )
-    assert result.exit_code == 1, result.output
-    assert "Error: Invalid model" in result.output
+    assert result.exit_code == 2, result.output
+    assert "No such command 'invalid'" in result.output
 
 
 def test_no_command_stdin(runner, httpserver, simple_user_payload):

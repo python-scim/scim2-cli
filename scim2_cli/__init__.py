@@ -1,5 +1,4 @@
 import json
-import re
 import sys
 from typing import IO
 from typing import Any
@@ -27,7 +26,7 @@ from scim2_cli.test import test_cli
 from scim2_cli.utils import DOC_URL
 from scim2_cli.utils import SCIM_EXCEPTIONS
 from scim2_cli.utils import HeaderType
-from scim2_cli.utils import escape_control_characters
+from scim2_cli.utils import command_name
 from scim2_cli.utils import exception_to_click_error
 from scim2_cli.utils import split_headers
 
@@ -137,14 +136,12 @@ def cli(
     except (*SCIM_EXCEPTIONS, ScimProviderError) as exc:
         raise exception_to_click_error(exc) from exc
 
-    provider = scim_client.provider
     ctx.obj["client"] = scim_client
-    ctx.obj["resource_models"] = {}
-    for resource_type in provider.resource_types:
-        resource_model = provider.model_for(resource_type)
-        assert resource_model is not None
-        name = re.sub(r"\[.*\]", "", resource_model.__name__.lower())
-        ctx.obj["resource_models"][escape_control_characters(name)] = resource_model
+    ctx.obj["resource_types"] = {
+        command_name(resource_type): resource_type
+        for resource_type in scim_client.provider.resource_types
+        if resource_type.name
+    }
 
     if not sys.stdin.isatty():  # pragma: no cover
         if stdin := sys.stdin.read().strip():

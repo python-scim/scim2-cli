@@ -23,7 +23,7 @@ HOSTILE_SEQUENCES = [
 
 
 def hostile_configuration(tmp_path, sequence):
-    """Write the description of a server whose schema carries the sequence."""
+    """Write the description of a server whose schema and resource type carry the sequence."""
     schema = Schema(
         id="urn:example:schemas:Hostile",
         name=f"Hostile{sequence}",
@@ -44,7 +44,7 @@ def hostile_configuration(tmp_path, sequence):
     )
     resource_type = ResourceType(
         id="Hostile",
-        name="Hostile",
+        name=f"Hostile{sequence}",
         endpoint="/Hostiles",
         schema_="urn:example:schemas:Hostile",
     )
@@ -99,7 +99,7 @@ def test_error_message_is_escaped(runner, httpserver, sequence, escaped):
 @pytest.mark.parametrize("command", ["create", "replace", "query", "delete"])
 @pytest.mark.parametrize(("sequence", "escaped"), HOSTILE_SEQUENCES)
 def test_subcommand_names_are_escaped(runner, tmp_path, command, sequence, escaped):
-    """A schema name is listed escaped among the subcommands."""
+    """A resource type name is listed escaped among the subcommands."""
     arguments = hostile_configuration(tmp_path, sequence)
     arguments += (
         [command, "--help"]

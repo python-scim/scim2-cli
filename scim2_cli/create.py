@@ -2,17 +2,18 @@ from typing import Any
 from typing import cast
 
 import click
-from click import ClickException
 from pydanclick import from_pydantic
 from scim2_client.engines.httpx2 import SyncSCIMClient
 from scim2_models import Context
 from scim2_models import Error
 from scim2_models import Resource
+from scim2_models import ResourceType
 from sphinx_click.rst_to_ansi_formatter import make_rst_to_ansi_formatter
 
 from scim2_cli.utils import DOC_URL
 from scim2_cli.utils import SCIM_EXCEPTIONS
 from scim2_cli.utils import ModelCommand
+from scim2_cli.utils import command_name
 from scim2_cli.utils import escape_options_help
 from scim2_cli.utils import exception_to_click_error
 from scim2_cli.utils import formatted_payload
@@ -20,12 +21,16 @@ from scim2_cli.utils import unacceptable_fields
 
 
 def create_payload(
-    client: SyncSCIMClient, payload: Resource[Any] | dict[str, Any], indent: bool
+    client: SyncSCIMClient,
+    resource_type: ResourceType | None,
+    payload: Resource[Any] | dict[str, Any],
+    indent: bool,
 ) -> None:
     try:
         # Response payloads are always checked, so the client never returns a dict.
         response = cast(
-            "Resource[Any] | Error", client.create(payload, raise_scim_errors=False)
+            "Resource[Any] | Error",
+            client.create(resource_type, payload, raise_scim_errors=False),
         )
 
     except SCIM_EXCEPTIONS as scim_exc:
@@ -34,15 +39,14 @@ def create_payload(
     click.echo(formatted_payload(response.model_dump(), indent))
 
 
-def create_factory(model: type[Resource[Any]] | None) -> click.Command:
-    if not model:
-        raise ClickException("Invalid model")
-
+def create_factory(
+    resource_type: ResourceType, model: type[Resource[Any]]
+) -> click.Command:
     exclude = unacceptable_fields(Context.RESOURCE_CREATION_REQUEST, model)
 
     @click.command(
         cls=make_rst_to_ansi_formatter(DOC_URL),
-        name=model.__name__.lower(),
+        name=command_name(resource_type),
     )
     @click.option(
         "--indent/--no-indent",
@@ -90,7 +94,7 @@ def create_factory(model: type[Resource[Any]] | None) -> click.Command:
             click.echo(ctx.get_help())
             ctx.exit(1)
 
-        create_payload(ctx.obj["client"], payload, indent)
+        create_payload(ctx.obj["client"], resource_type, payload, indent)
 
     return escape_options_help(create_command)
 
@@ -111,7 +115,7 @@ def create_factory(model: type[Resource[Any]] | None) -> click.Command:
 def create_cli(ctx: click.Context, indent: bool) -> None:
     """Perform a `SCIM POST <https://www.rfc-editor.org/rfc/rfc7644#section-3.3>`_ request on resources endpoint.
 
-    There are subcommands for all the available models, with dynamic attributes.
+    There are subcommands for all the resource types of the server, with dynamic attributes.
     See the attributes for :code:`user` with:
 
     .. code-block:: bash
@@ -133,4 +137,4 @@ def create_cli(ctx: click.Context, indent: bool) -> None:
         click.echo(ctx.get_help())
         ctx.exit(1)
 
-    create_payload(ctx.obj["client"], payload, indent)
+    create_payload(ctx.obj["client"], None, payload, indent)

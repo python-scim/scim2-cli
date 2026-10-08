@@ -303,7 +303,10 @@ def test_unknown_resource_type(
         catch_exceptions=False,
     )
     assert result.exit_code == 1, result.output
-    assert "Unknown resource type 'invalid. Available values are:" in result.output
+    assert (
+        "Unknown resource type 'invalid'. Available values are: user, schema, resourcetype, serviceproviderconfig"
+        in result.output
+    )
 
 
 def test_scimclient_error(runner, httpserver, simple_user_payload):

@@ -1,10 +1,10 @@
 import click
-from click import ClickException
 from scim2_models import Message
 from scim2_models import Resource
 from sphinx_click.rst_to_ansi_formatter import make_rst_to_ansi_formatter
 
 from scim2_cli.utils import exception_to_click_error
+from scim2_cli.utils import find_target
 
 from .utils import DOC_URL
 from .utils import SCIM_EXCEPTIONS
@@ -28,16 +28,10 @@ def delete_cli(ctx: click.Context, resource_type: str, id: str, indent: bool) ->
 
          delete user 1234
     """
-    try:
-        resource_model = ctx.obj["resource_models"][resource_type]
-    except KeyError as exc:
-        ok_values = ", ".join(ctx.obj["resource_models"])
-        raise ClickException(
-            f"Unknown resource type '{resource_type}'. Available values are: {ok_values}'"
-        ) from exc
+    target = find_target(ctx.obj["resource_types"], resource_type)
 
     try:
-        response = ctx.obj["client"].delete(resource_model, id, raise_scim_errors=False)
+        response = ctx.obj["client"].delete(target, id, raise_scim_errors=False)
 
     except SCIM_EXCEPTIONS as scim_exc:
         raise exception_to_click_error(scim_exc) from scim_exc

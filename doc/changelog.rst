@@ -7,6 +7,12 @@ Changelog
 Changed
 ^^^^^^^
 - scim2-client 0.13.0 is now the minimum supported version.
+- The commands are named after the resource types of the server, instead of their models.
+  Each resource type has its own command, even when several ones share a schema:
+  ``scim2 query employee 1`` reads ``/Employees/1`` next to ``scim2 query user 1``.
+  A resource type no longer needs to be named after its schema.
+  The resource type can be typed with any case.
+- An unknown subcommand of ``create`` and ``replace`` is reported as a usage error.
 
 [0.4.1] - 2026-10-08
 --------------------

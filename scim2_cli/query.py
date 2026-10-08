@@ -1,5 +1,8 @@
+from typing import Any
+
 import click
 from click import ClickException
+from scim2_models import Resource
 from scim2_models import ResourceType
 from scim2_models import ResponseParameters
 from scim2_models import Schema
@@ -8,10 +11,13 @@ from scim2_models import ServiceProviderConfig
 from sphinx_click.rst_to_ansi_formatter import make_rst_to_ansi_formatter
 
 from scim2_cli.utils import exception_to_click_error
+from scim2_cli.utils import find_target
 
 from .utils import DOC_URL
 from .utils import SCIM_EXCEPTIONS
 from .utils import formatted_payload
+
+DISCOVERY_MODELS = (Schema, ResourceType, ServiceProviderConfig)
 
 
 @click.command(cls=make_rst_to_ansi_formatter(DOC_URL), name="query")
@@ -84,20 +90,15 @@ def query_cli(
         echo '{"startIndex": 50, "count": 10}' |  query user
 
     """
-    for discovery_model in (Schema, ResourceType, ServiceProviderConfig):
-        ctx.obj["resource_models"][discovery_model.__name__.lower()] = discovery_model
-
-    model = None
+    target: ResourceType | type[Resource[Any]] | None = None
     if resource_type:
-        try:
-            model = ctx.obj["resource_models"][resource_type]
-        except KeyError as exc:
-            ok_values = ", ".join(ctx.obj["resource_models"])
-            raise ClickException(
-                f"Unknown resource type '{resource_type}. Available values are: {ok_values}'"
-            ) from exc
+        targets: dict[str, ResourceType | type[Resource[Any]]] = {
+            **ctx.obj["resource_types"],
+            **{model.__name__.lower(): model for model in DISCOVERY_MODELS},
+        }
+        target = find_target(targets, resource_type)
 
-    single_resource = bool(id) or model is ServiceProviderConfig
+    single_resource = bool(id) or target is ServiceProviderConfig
     listing_options = [
         name
         for name, value in (
@@ -143,7 +144,7 @@ def query_cli(
 
     try:
         response = ctx.obj["client"].query(
-            model,
+            target,
             id,
             query_parameters=payload,
             check_request_payload=check_request_payload,

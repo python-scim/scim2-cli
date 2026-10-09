@@ -80,8 +80,8 @@ def create_factory(
 
         .. code-block:: bash
 
-            scim create user \\
-                --user-name "foo" \\
+            scim create user \
+                --user-name "foo" \
                 --emails '[{"value":"foo@bar.example", "primary": true}, {"value": "foo@baz.example"}]'
 
         Input can also be passed through stdin in JSON format:

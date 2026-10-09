@@ -82,9 +82,9 @@ def replace_factory(
 
         .. code-block:: bash
 
-             replace user \\
-                --id "xxxx-yyyy" \\
-                --user-name "foo" \\
+             replace user \
+                --id "xxxx-yyyy" \
+                --user-name "foo" \
                 --emails '[{"value":"foo@bar.example", "primary": true}, {"value": "foo@baz.example"}]'
 
         Input can also be passed through stdin in JSON format:

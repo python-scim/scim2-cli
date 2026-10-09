@@ -71,3 +71,27 @@ def test_success_does_not_fail_the_command(runner, httpserver, simple_user_paylo
 
     assert result.exit_code == 0, result.output
     assert result.stderr == ""
+
+
+@pytest.mark.parametrize(
+    ("status", "content_type", "body"),
+    [
+        (404, "text/html", "<html>Not Found</html>"),
+        (403, "text/plain", "Forbidden"),
+        (404, "application/scim+json", ""),
+        (401, "application/json", '{"error": "unauthorized"}'),
+        (502, "text/html", "<html>Bad Gateway</html>"),
+    ],
+)
+def test_failure_without_scim_error(runner, httpserver, status, content_type, body):
+    """A failure without a SCIM error reports its HTTP status and fails the command."""
+    httpserver.expect_oneshot_request("/Users/1").respond_with_data(
+        body, status=status, content_type=content_type
+    )
+
+    result = runner.invoke(
+        cli, ["--url", httpserver.url_for("/"), "query", "user", "1"]
+    )
+
+    assert result.exit_code == 1, result.output
+    assert f"Error: The server answered {status} without a SCIM error" in result.output

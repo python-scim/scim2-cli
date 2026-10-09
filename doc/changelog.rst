@@ -23,6 +23,10 @@ Changed
 
 Fixed
 ^^^^^
+- A failure the server answers without a SCIM error, such as an HTML page or a ``404`` without
+  body, gives its HTTP status: ``Error: The server answered 404 without a SCIM error``.
+  A ``404`` without body used to exit with the code 0.
+  scim2-client 0.13.2 is now the minimum supported version. :issue:`12`
 - The help of ``query``, ``search``, ``delete``, ``modify``, ``bulk`` and ``test`` is displayed
   without a server URL and without contacting the server.
 

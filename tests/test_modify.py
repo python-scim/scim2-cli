@@ -324,7 +324,7 @@ def test_error_response(invoke, httpserver):
 
 
 def test_unexpected_response(invoke, httpserver):
-    """A response that is not a SCIM message is reported."""
+    """A failure that is not a SCIM message reports its status."""
     httpserver.expect_oneshot_request("/Users/1", method="PATCH").respond_with_data(
         "<html>Internal Server Error</html>", status=500, content_type="text/html"
     )
@@ -332,7 +332,7 @@ def test_unexpected_response(invoke, httpserver):
     result = invoke("modify", "user", "1", "remove", "nickName")
 
     assert result.exit_code == 1, result.output
-    assert "Error: Unexpected response content format" in result.output
+    assert "Error: The server answered 500 without a SCIM error" in result.output
 
 
 def test_me(invoke, httpserver, simple_user_payload):

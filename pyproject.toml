@@ -27,7 +27,7 @@ classifiers = [
 requires-python = ">= 3.11"
 dependencies = [
     "click>=8.5.0",
-    "scim2-client[httpx2]>=0.13.0",
+    "scim2-client[httpx2]>=0.13.2",
     "scim2-tester>=0.5.1",
     "sphinx-click-rst-to-ansi-formatter>=0.2.0",
     "pydanclick>=0.5.0",

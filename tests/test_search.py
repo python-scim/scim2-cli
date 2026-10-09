@@ -105,7 +105,7 @@ def test_scimclient_error(runner, httpserver, simple_user_payload):
         catch_exceptions=False,
     )
     assert result.exit_code == 1, result.output
-    assert "Unexpected response status code: 666" in result.output
+    assert "Error: The server answered 666 without a SCIM error" in result.output
 
 
 def test_search_a_resource_type(runner, httpserver, simple_user_payload):

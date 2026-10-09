@@ -117,7 +117,7 @@ def test_no_command_scimclient_error(runner, httpserver, simple_user_payload):
         catch_exceptions=False,
     )
     assert result.exit_code == 1, result.output
-    assert "Unexpected response status code: 999" in result.output
+    assert "Error: The server answered 999 without a SCIM error" in result.output
 
 
 def test_no_command_validation_error(runner, httpserver, simple_user_payload):
@@ -272,7 +272,7 @@ def test_command_scimclient_error(runner, httpserver, simple_user_payload):
         catch_exceptions=False,
     )
     assert result.exit_code == 1, result.output
-    assert "Unexpected response status code: 999" in result.output
+    assert "Error: The server answered 999 without a SCIM error" in result.output
 
 
 def test_command_validation_error(runner, httpserver, simple_user_payload):

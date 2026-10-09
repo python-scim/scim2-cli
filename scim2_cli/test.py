@@ -34,7 +34,7 @@ def test_cli(
 
          test
     """
-    client = ctx.obj["client"]
+    client = ctx.obj.client
     client.check_response_status_codes = check_status_code
     client.check_response_content_type = check_content_type
     results = check_server(client)

@@ -14,6 +14,11 @@ Added
 - The ``bulk`` command sends the bulk request passed to stdin (:rfc:`7644#section-3.7`).
   The request is checked against the bulk capabilities of the server before being sent.
 
+Fixed
+^^^^^
+- The help of ``query``, ``search``, ``delete``, ``modify``, ``bulk`` and ``test`` is displayed
+  without a server URL and without contacting the server.
+
 [0.5.0] - 2026-10-08
 --------------------
 

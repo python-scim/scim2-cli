@@ -50,12 +50,10 @@ def delete_cli(
     if not me and not (resource_type and id):
         raise ClickException("Pass a resource type and an id, or --me.")
 
-    target = (
-        find_target(ctx.obj["resource_types"], resource_type) if resource_type else Me
-    )
+    target = find_target(ctx.obj.resource_types, resource_type) if resource_type else Me
 
     try:
-        response = ctx.obj["client"].delete(target, id, raise_scim_errors=False)
+        response = ctx.obj.client.delete(target, id, raise_scim_errors=False)
 
     except SCIM_EXCEPTIONS as scim_exc:
         raise exception_to_click_error(scim_exc) from scim_exc

@@ -106,7 +106,7 @@ def query_cli(
     target: ResourceType | type[Resource[Any]] | None = None
     if resource_type:
         targets: dict[str, ResourceType | type[Resource[Any]]] = {
-            **ctx.obj["resource_types"],
+            **ctx.obj.resource_types,
             **{model.__name__.lower(): model for model in DISCOVERY_MODELS},
         }
         target = find_target(targets, resource_type)
@@ -129,9 +129,9 @@ def query_cli(
             f"{', '.join(listing_options)} cannot be used when querying a single resource."
         )
 
-    if ctx.obj.get("stdin"):
+    if ctx.obj.stdin:
         check_request_payload = False
-        payload = ctx.obj.get("stdin")
+        payload = ctx.obj.stdin
 
     elif single_resource:
         check_request_payload = True
@@ -158,7 +158,7 @@ def query_cli(
         )
 
     try:
-        response = ctx.obj["client"].query(
+        response = ctx.obj.client.query(
             Me if me else target,
             id,
             query_parameters=payload,

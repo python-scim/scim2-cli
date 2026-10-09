@@ -155,16 +155,16 @@ class ModelCommand(RstToAnsiGroup):
         self.factory = factory
 
     def list_commands(self, ctx: click.Context) -> list[str]:
-        ctx.ensure_object(dict)
         base = super().list_commands(ctx)
-        lazy = sorted(ctx.obj.get("resource_types", {}).keys())
-        return base + lazy
+        if ctx.obj is None:
+            return base
+        return base + sorted(ctx.obj.resource_types)
 
     def get_command(self, ctx: click.Context, cmd_name: str) -> click.Command | None:
-        resource_type = ctx.obj["resource_types"].get(cmd_name.lower())
+        resource_type = ctx.obj.resource_types.get(cmd_name.lower())
         if resource_type is None:
             return None
-        model = ctx.obj["client"].provider.model_for(resource_type)
+        model = ctx.obj.client.provider.model_for(resource_type)
         return self.factory(resource_type, model)
 
 

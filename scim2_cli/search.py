@@ -80,12 +80,12 @@ def search_cli(
 
     """
     target = (
-        find_target(ctx.obj["resource_types"], resource_type) if resource_type else None
+        find_target(ctx.obj.resource_types, resource_type) if resource_type else None
     )
 
-    if ctx.obj.get("stdin"):
+    if ctx.obj.stdin:
         check_request_payload = False
-        payload = ctx.obj.get("stdin")
+        payload = ctx.obj.stdin
 
     else:
         check_request_payload = True
@@ -103,7 +103,7 @@ def search_cli(
         )
 
     try:
-        response = ctx.obj["client"].search(
+        response = ctx.obj.client.search(
             target,
             search_request=payload,
             check_request_payload=check_request_payload,

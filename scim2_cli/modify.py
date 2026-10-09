@@ -175,8 +175,8 @@ def modify_cli(
         echo '{"schemas": ["urn:ietf:params:scim:api:messages:2.0:PatchOp"], "Operations": [{"op": "replace", "value": {"displayName": "Barbara Jensen"}}]}' |  modify user 1234
 
     """
-    resource_types = ctx.obj["resource_types"]
-    provider = ctx.obj["client"].provider
+    resource_types = ctx.obj.resource_types
+    provider = ctx.obj.client.provider
     if me and arguments and arguments[0].lower() in resource_types:
         raise ClickException("--me cannot be used with a resource type or an id.")
 
@@ -192,7 +192,7 @@ def modify_cli(
         id, tokens = arguments[1], arguments[2:]
         models = [provider.model_for(target)]
 
-    stdin = ctx.obj.get("stdin")
+    stdin = ctx.obj.stdin
     if stdin and tokens:
         raise ClickException("Pass the operations either as arguments or to stdin.")
 
@@ -201,9 +201,7 @@ def modify_cli(
 
     payload = stdin or build_patch(models, parse_operations(tokens))
     try:
-        response = ctx.obj["client"].modify(
-            target, id, payload, raise_scim_errors=False
-        )
+        response = ctx.obj.client.modify(target, id, payload, raise_scim_errors=False)
 
     except SCIM_EXCEPTIONS as scim_exc:
         raise exception_to_click_error(scim_exc) from scim_exc

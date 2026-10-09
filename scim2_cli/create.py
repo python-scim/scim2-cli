@@ -101,13 +101,13 @@ def create_factory(
         if obj == model():
             obj = None
 
-        payload = ctx.obj.get("stdin") or obj
+        payload = ctx.obj.stdin or obj
         if not payload:
             click.echo(ctx.get_help())
             ctx.exit(1)
 
         create_payload(
-            ctx.obj["client"],
+            ctx.obj.client,
             resource_type,
             payload,
             inherited(ctx, "cli_indent", cli_indent),
@@ -149,9 +149,9 @@ def create_cli(ctx: click.Context, cli_indent: bool, cli_me: bool) -> None:
     if ctx.invoked_subcommand is not None:
         return
 
-    payload = ctx.obj.get("stdin")
+    payload = ctx.obj.stdin
     if not payload:
         click.echo(ctx.get_help())
         ctx.exit(1)
 
-    create_payload(ctx.obj["client"], None, payload, cli_indent, cli_me)
+    create_payload(ctx.obj.client, None, payload, cli_indent, cli_me)

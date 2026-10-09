@@ -22,13 +22,13 @@ def bulk_cli(ctx: click.Context, indent: bool) -> None:
 
     The request is checked against the bulk capabilities of the server before being sent.
     """
-    payload = ctx.obj.get("stdin")
+    payload = ctx.obj.stdin
     if not payload:
         click.echo(ctx.get_help())
         ctx.exit(1)
 
     try:
-        response = ctx.obj["client"].bulk(payload, raise_scim_errors=False)
+        response = ctx.obj.client.bulk(payload, raise_scim_errors=False)
 
     except SCIM_EXCEPTIONS as scim_exc:
         raise exception_to_click_error(scim_exc) from scim_exc

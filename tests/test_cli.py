@@ -1,6 +1,7 @@
 import json
 import os
 
+import click
 import pytest
 from scim2_models import AuthenticationScheme
 from scim2_models import Bulk
@@ -17,6 +18,8 @@ from scim2_models import Sort
 from scim2_models import User
 
 from scim2_cli import cli
+from scim2_cli.create import create_cli
+from scim2_cli.replace import replace_cli
 
 
 def test_no_url(runner):
@@ -472,3 +475,55 @@ def test_discovery_scim_error(runner, httpserver):
     )
     assert result.exit_code == 1, result.output
     assert "Error: Insufficient permissions" in result.output
+
+
+@pytest.mark.parametrize(
+    "command", ["query", "search", "delete", "modify", "bulk", "test"]
+)
+@pytest.mark.parametrize(
+    "url", [[], ["--url", "http://scim.invalid"]], ids=["no-url", "unreachable"]
+)
+def test_help_without_server(runner, command, url):
+    """The help of the commands that do not depend on the server needs no server."""
+    result = runner.invoke(cli, [*url, command, "--help"], env={"SCIM_CLI_URL": None})
+
+    assert result.exit_code == 0, result.output
+    assert f"Usage: cli {command}" in result.output
+
+
+@pytest.mark.parametrize("command", ["create", "replace"])
+def test_resource_type_subcommands_need_the_server(runner, command):
+    """The resource type subcommands come from the server."""
+    result = runner.invoke(cli, [command, "--help"], env={"SCIM_CLI_URL": None})
+
+    assert result.exit_code == 1, result.output
+    assert "No SCIM server URL defined." in result.output
+
+
+@pytest.mark.parametrize("command", [create_cli, replace_cli])
+def test_subcommands_without_server(command):
+    """Without a server, as when the documentation is built, there are no subcommands."""
+    assert command.list_commands(click.Context(command)) == []
+
+
+def test_server_is_discovered_once(runner, httpserver, simple_user_payload):
+    """The server is discovered once per command."""
+    httpserver.expect_request("/Users/1").respond_with_json(
+        simple_user_payload("1"), content_type="application/scim+json"
+    )
+
+    result = runner.invoke(
+        cli, ["--url", httpserver.url_for("/"), "query", "user", "1"]
+    )
+
+    assert result.exit_code == 0, result.output
+    discoveries = [
+        request.path
+        for request, _ in httpserver.log
+        if request.path in ("/ResourceTypes", "/Schemas", "/ServiceProviderConfig")
+    ]
+    assert sorted(discoveries) == [
+        "/ResourceTypes",
+        "/Schemas",
+        "/ServiceProviderConfig",
+    ]

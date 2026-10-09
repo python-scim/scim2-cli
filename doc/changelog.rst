@@ -11,6 +11,8 @@ Added
   ``scim2 modify user 1 replace displayName "Barbara Jensen" remove nickName``.
   Values of string attributes are passed as is, the other values are passed in JSON.
   ``scim2 modify --me`` sends the operations to ``/Me``.
+- The ``bulk`` command sends the bulk request passed to stdin (:rfc:`7644#section-3.7`).
+  The request is checked against the bulk capabilities of the server before being sent.
 
 [0.5.0] - 2026-10-08
 --------------------

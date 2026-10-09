@@ -299,3 +299,24 @@ When used with :ref:`reference:create` and :ref:`reference:replace`, no subcomma
         },
         "userName": "bjensen@example.com"
     }
+
+When used with :ref:`reference:bulk`, the input value must be a JSON representation of a :class:`~scim2_models.BulkRequest` object.
+The request is checked against the bulk capabilities of the server before being sent.
+
+.. code-block:: console
+   :caption: Creation of an user in a bulk request.
+
+   $ echo '{"schemas": ["urn:ietf:params:scim:api:messages:2.0:BulkRequest"], "Operations": [{"method": "POST", "path": "/Users", "bulkId": "qwerty", "data": {"schemas": ["urn:ietf:params:scim:schemas:core:2.0:User"], "userName": "bjensen@example.com"}}]}' | scim bulk
+   {
+       "schemas": [
+           "urn:ietf:params:scim:api:messages:2.0:BulkResponse"
+       ],
+       "Operations": [
+           {
+               "method": "POST",
+               "bulkId": "qwerty",
+               "location": "http://scim.example/v2/Users/92b725cd9465",
+               "status": "201"
+           }
+       ]
+   }

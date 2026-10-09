@@ -13,6 +13,7 @@ It allows users and groups creations, modifications and deletions to be synchron
 
 - **CRUD Commands**: `create`, `query`, `replace`, `modify` and `delete` resources from the command line
 - **Search Command**: Query resources using SCIM filters, sorting and pagination
+- **Bulk Command**: Send bulk requests passed as JSON through stdin
 - **Compliance Testing**: Built-in `test` command using [scim2-tester](https://scim2-tester.readthedocs.io) to validate server RFC compliance
 - **Server Discovery**: Automatic retrieval of server schemas and resource types
 - **Dynamic CLI Options**: Command options generated from server schemas

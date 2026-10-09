@@ -17,6 +17,7 @@ from scim2_models import ScimProviderError
 from scim2_models import ServiceProviderConfig
 from sphinx_click.rst_to_ansi_formatter import make_rst_to_ansi_formatter
 
+from scim2_cli.bulk import bulk_cli
 from scim2_cli.create import create_cli
 from scim2_cli.delete import delete_cli
 from scim2_cli.modify import modify_cli
@@ -159,6 +160,7 @@ cli.add_command(replace_cli)
 cli.add_command(modify_cli)
 cli.add_command(delete_cli)
 cli.add_command(search_cli)
+cli.add_command(bulk_cli)
 cli.add_command(test_cli)
 
 if __name__ == "__main__":  # pragma: no cover

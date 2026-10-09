@@ -3,8 +3,8 @@ from sphinx_click.rst_to_ansi_formatter import make_rst_to_ansi_formatter
 
 from scim2_cli.utils import DOC_URL
 from scim2_cli.utils import SCIM_EXCEPTIONS
+from scim2_cli.utils import echo_response
 from scim2_cli.utils import exception_to_click_error
-from scim2_cli.utils import formatted_payload
 from scim2_cli.utils import indent_option
 
 
@@ -33,4 +33,4 @@ def bulk_cli(ctx: click.Context, indent: bool) -> None:
     except SCIM_EXCEPTIONS as scim_exc:
         raise exception_to_click_error(scim_exc) from scim_exc
 
-    click.echo(formatted_payload(response.model_dump(), indent))
+    echo_response(response, indent)

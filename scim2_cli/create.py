@@ -15,9 +15,9 @@ from scim2_cli.utils import DOC_URL
 from scim2_cli.utils import SCIM_EXCEPTIONS
 from scim2_cli.utils import ModelCommand
 from scim2_cli.utils import command_name
+from scim2_cli.utils import echo_response
 from scim2_cli.utils import escape_options_help
 from scim2_cli.utils import exception_to_click_error
-from scim2_cli.utils import formatted_payload
 from scim2_cli.utils import indent_option
 from scim2_cli.utils import inherited
 from scim2_cli.utils import me_option
@@ -44,7 +44,7 @@ def create_payload(
     except SCIM_EXCEPTIONS as scim_exc:
         raise exception_to_click_error(scim_exc) from scim_exc
 
-    click.echo(formatted_payload(response.model_dump(), indent))
+    echo_response(response, indent)
 
 
 def create_factory(

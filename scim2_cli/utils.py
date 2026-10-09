@@ -12,7 +12,9 @@ from click import ClickException
 from click.core import ParameterSource
 from scim2_client import SCIMClientException
 from scim2_models import BaseModel
+from scim2_models import BulkResponse
 from scim2_models import Context
+from scim2_models import Error
 from scim2_models import Mutability
 from scim2_models import Resource
 from scim2_models import ResourceType
@@ -127,6 +129,30 @@ def inherited(ctx: click.Context, name: str, value: T) -> T:
 
 def formatted_payload(obj: Any, indent: bool) -> str:
     return json.dumps(obj, indent=INDENTATION_SIZE if indent else None)
+
+
+def echo_response(response: Any, indent: bool) -> None:
+    """Display the response of the server, and exit with an error code if it reports a failure."""
+    if response is None:
+        return
+
+    click.echo(formatted_payload(response.model_dump(), indent))
+    if isinstance(response, Error):
+        summary = " ".join(
+            str(part) for part in (response.status, response.detail) if part
+        )
+        click.echo(f"Error: {escape_control_characters(summary)}", err=True)
+        click.get_current_context().exit(1)
+
+    if isinstance(response, BulkResponse):
+        operations = response.operations or []
+        failed = [op for op in operations if op.status and op.status >= 400]
+        if failed:
+            click.echo(
+                f"Error: {len(failed)} of {len(operations)} bulk operations failed",
+                err=True,
+            )
+            click.get_current_context().exit(1)
 
 
 def split_headers(headers: list[str]) -> dict[str, str]:

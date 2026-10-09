@@ -72,7 +72,7 @@ def test_bad_resource_type(runner, httpserver):
 
 
 def test_not_found(runner, httpserver):
-    """Test pydantic errors handling."""
+    """An error answered by the server is displayed, and the command fails."""
     httpserver.expect_request(
         "/Users/unknown-id",
         method="DELETE",
@@ -97,8 +97,12 @@ def test_not_found(runner, httpserver):
         ],
         catch_exceptions=False,
     )
-    assert result.exit_code == 0, result.output
-    json_output = json.loads(result.output)
+    assert result.exit_code == 1, result.output
+    assert (
+        result.stderr
+        == "Error: 404 Resource 2819c223-7f76-453a-919d-413861904646 not found\n"
+    )
+    json_output = json.loads(result.stdout)
     assert json_output == {
         "schemas": ["urn:ietf:params:scim:api:messages:2.0:Error"],
         "detail": "Resource 2819c223-7f76-453a-919d-413861904646 not found",

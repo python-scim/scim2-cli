@@ -256,6 +256,29 @@ See the :doc:`scim2-tester documentation <scim2_tester:index>` for more details 
     SUCCESS check_access_invalid_resource_typ
     ...
 
+Errors
+------
+
+When the server answers an error, the command displays it on stdout and fails with the exit code 1.
+A summary of the error is displayed on stderr, so the output can still be read by another program.
+
+.. code-block:: console
+   :caption: Querying an user that does not exist.
+
+   $ scim query user unknown-id
+   {
+       "schemas": [
+           "urn:ietf:params:scim:api:messages:2.0:Error"
+       ],
+       "status": "404",
+       "detail": "Resource unknown-id not found"
+   }
+   Error: 404 Resource unknown-id not found
+   $ echo $?
+   1
+
+The :ref:`reference:bulk` command fails the same way when some operations of the bulk response failed.
+
 JSON input
 ----------
 

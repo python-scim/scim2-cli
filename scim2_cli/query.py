@@ -17,7 +17,7 @@ from scim2_cli.utils import me_option
 
 from .utils import DOC_URL
 from .utils import SCIM_EXCEPTIONS
-from .utils import formatted_payload
+from .utils import echo_response
 
 DISCOVERY_MODELS = (Schema, ResourceType, ServiceProviderConfig)
 
@@ -169,5 +169,4 @@ def query_cli(
     except SCIM_EXCEPTIONS as scim_exc:
         raise exception_to_click_error(scim_exc) from scim_exc
 
-    payload = formatted_payload(response.model_dump(), indent)
-    click.echo(payload)
+    echo_response(response, indent)

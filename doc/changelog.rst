@@ -16,6 +16,9 @@ Added
 
 Changed
 ^^^^^^^
+- The commands fail with the exit code 1 when the server answers an error, or a bulk response
+  with failed operations. The response is still displayed on stdout, and a summary of the error
+  is displayed on stderr. :issue:`2`
 - The errors of the server discovery give the URL of the server.
 
 Fixed

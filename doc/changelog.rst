@@ -14,6 +14,10 @@ Added
 - The ``bulk`` command sends the bulk request passed to stdin (:rfc:`7644#section-3.7`).
   The request is checked against the bulk capabilities of the server before being sent.
 
+Changed
+^^^^^^^
+- The errors of the server discovery give the URL of the server.
+
 Fixed
 ^^^^^
 - The help of ``query``, ``search``, ``delete``, ``modify``, ``bulk`` and ``test`` is displayed

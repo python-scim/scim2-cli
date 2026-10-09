@@ -19,6 +19,7 @@ from scim2_models import ServiceProviderConfig
 
 from scim2_cli.utils import SCIM_EXCEPTIONS
 from scim2_cli.utils import command_name
+from scim2_cli.utils import escape_control_characters
 from scim2_cli.utils import exception_to_click_error
 
 ResourceT = TypeVar("ResourceT", bound=Resource[Any])
@@ -99,7 +100,11 @@ class Session:
                 self.service_provider_config,
             )
         except (*SCIM_EXCEPTIONS, ScimProviderError) as exc:
-            raise exception_to_click_error(exc) from exc
+            error = exception_to_click_error(exc)
+            raise ClickException(
+                f"Could not discover the server at {escape_control_characters(self.url)}: "
+                f"{error.message}"
+            ) from exc
         return client
 
     @cached_property

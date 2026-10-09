@@ -38,7 +38,10 @@ def test_bad_server(runner):
     """Test that the discovery step display a readable error when a bad server has been passed."""
     result = runner.invoke(cli, ["--url", "http://scim.invalid", "query"])
     assert result.exit_code == 1
-    assert "Error: Network error happened during request\n" in result.output
+    assert (
+        "Error: Could not discover the server at http://scim.invalid: "
+        "Network error happened during request\n" in result.output
+    )
 
 
 def test_stdin_bad_json(runner, httpserver):
@@ -401,7 +404,7 @@ def test_incoherent_server_description(runner, httpserver, tmp_path, schemas):
     )
     assert result.exit_code == 1, result.output
     assert (
-        "Error: No resource describes urn:ietf:params:scim:schemas:core:2.0:Group"
+        ": No resource describes urn:ietf:params:scim:schemas:core:2.0:Group"
         in result.output
     )
 
@@ -474,7 +477,10 @@ def test_discovery_scim_error(runner, httpserver):
         catch_exceptions=False,
     )
     assert result.exit_code == 1, result.output
-    assert "Error: Insufficient permissions" in result.output
+    assert (
+        f"Error: Could not discover the server at {httpserver.url_for('/')}: "
+        "Insufficient permissions" in result.output
+    )
 
 
 @pytest.mark.parametrize(

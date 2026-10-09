@@ -109,7 +109,7 @@ def test_too_many_operations(invoke):
 
 
 def test_error_response(invoke, httpserver):
-    """The error the server answers is displayed."""
+    """The error the server answers is displayed, and the command fails."""
     httpserver.expect_oneshot_request("/Bulk", method="POST").respond_with_json(
         {
             "schemas": ["urn:ietf:params:scim:api:messages:2.0:Error"],
@@ -122,4 +122,36 @@ def test_error_response(invoke, httpserver):
 
     result = invoke("bulk", input=json.dumps(BULK_REQUEST))
 
-    assert json.loads(result.output)["status"] == "413"
+    assert result.exit_code == 1, result.output
+    assert json.loads(result.stdout)["status"] == "413"
+    assert result.stderr == (
+        "Error: 413 The size of the bulk operation exceeds the maxPayloadSize\n"
+    )
+
+
+def test_failed_operations(invoke, httpserver):
+    """A bulk response with failed operations is displayed, and the command fails."""
+    operations = [
+        BULK_RESPONSE["Operations"][0],
+        {
+            "method": "POST",
+            "bulkId": "ytrewq",
+            "status": "409",
+            "response": {
+                "schemas": ["urn:ietf:params:scim:api:messages:2.0:Error"],
+                "scimType": "uniqueness",
+                "status": "409",
+                "detail": "userName is already taken",
+            },
+        },
+    ]
+    httpserver.expect_oneshot_request("/Bulk", method="POST").respond_with_json(
+        {**BULK_RESPONSE, "Operations": operations},
+        content_type="application/scim+json",
+    )
+
+    result = invoke("bulk", input=json.dumps(BULK_REQUEST))
+
+    assert result.exit_code == 1, result.output
+    assert len(json.loads(result.stdout)["Operations"]) == 2
+    assert result.stderr == "Error: 1 of 2 bulk operations failed\n"

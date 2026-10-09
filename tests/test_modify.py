@@ -305,7 +305,7 @@ def test_stdin_and_operations(invoke):
 
 
 def test_error_response(invoke, httpserver):
-    """The error the server answers is displayed."""
+    """The error the server answers is displayed, and the command fails."""
     httpserver.expect_oneshot_request("/Users/1", method="PATCH").respond_with_json(
         {
             "schemas": ["urn:ietf:params:scim:api:messages:2.0:Error"],
@@ -318,7 +318,9 @@ def test_error_response(invoke, httpserver):
 
     result = invoke("modify", "user", "1", "remove", "nickName")
 
-    assert json.loads(result.output)["detail"] == "Resource 1 not found"
+    assert result.exit_code == 1, result.output
+    assert json.loads(result.stdout)["detail"] == "Resource 1 not found"
+    assert result.stderr == "Error: 404 Resource 1 not found\n"
 
 
 def test_unexpected_response(invoke, httpserver):

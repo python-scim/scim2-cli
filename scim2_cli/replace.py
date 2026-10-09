@@ -21,7 +21,7 @@ from scim2_cli.utils import me_option
 from .utils import DOC_URL
 from .utils import SCIM_EXCEPTIONS
 from .utils import ModelCommand
-from .utils import formatted_payload
+from .utils import echo_response
 from .utils import renamed_fields
 from .utils import unacceptable_fields
 
@@ -45,7 +45,7 @@ def replace_payload(
     except SCIM_EXCEPTIONS as scim_exc:
         raise exception_to_click_error(scim_exc) from scim_exc
 
-    click.echo(formatted_payload(response.model_dump(), indent))
+    echo_response(response, indent)
 
 
 def replace_factory(

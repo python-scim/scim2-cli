@@ -145,3 +145,25 @@ def test_line_breaks_and_tabulations_are_kept(runner, httpserver):
         ).output
 
     assert "first\n\tsecond" in output
+
+
+@pytest.mark.parametrize(("sequence", "escaped"), HOSTILE_SEQUENCES)
+def test_error_summary_is_escaped(runner, httpserver, sequence, escaped):
+    """The detail of an error is escaped in the summary on stderr."""
+    httpserver.expect_request("/Users/1").respond_with_json(
+        {
+            "schemas": ["urn:ietf:params:scim:api:messages:2.0:Error"],
+            "status": "404",
+            "detail": f"not found{sequence}",
+        },
+        status=404,
+        content_type="application/scim+json",
+    )
+
+    result = runner.invoke(
+        cli, ["--url", httpserver.url_for("/"), "query", "user", "1"], color=True
+    )
+
+    assert result.exit_code == 1
+    assert f"not found{escaped}" in result.stderr
+    assert sequence not in result.stderr

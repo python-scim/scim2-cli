@@ -63,7 +63,9 @@ def test_query_error(invoke, httpserver):
 
     result = invoke("query", "--me")
 
-    assert json.loads(result.output)["status"] == "501"
+    assert result.exit_code == 1, result.output
+    assert json.loads(result.stdout)["status"] == "501"
+    assert result.stderr == "Error: 501 /Me is not supported\n"
 
 
 @pytest.mark.parametrize("arguments", [["user"], ["user", "1"]])

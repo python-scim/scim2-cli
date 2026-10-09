@@ -89,7 +89,7 @@ def read_value(model: type[Resource[Any]], path: str, value: str) -> Any:
 
 def build_patch(
     models: list[type[Resource[Any]]], operations: list[tuple[str, str, str | None]]
-) -> PatchOp[Any]:
+) -> PatchOp[Resource[Any]]:
     """Build the patch operation of the first model that has all the attributes."""
     paths = [path for _, path, _ in operations]
     for path in paths:

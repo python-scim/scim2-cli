@@ -189,6 +189,24 @@ You can have a look at the exhaustive list of options by running ``scim create u
         "userName": "bjensen@example.com"
     }
 
+Modify resources
+----------------
+
+The :ref:`reference:modify` command sends patch operations to a resource.
+The operations follow the resource type and the id, and are applied in order:
+``add PATH VALUE``, ``replace PATH VALUE`` and ``remove PATH``.
+Values of string attributes are passed as is, the other values are passed in JSON.
+
+.. code-block:: console
+   :caption: Modification of an user.
+
+   $ scim modify user 38b044dd95624c4186f5614fca30305d \
+       replace displayName "Barbara Jensen" \
+       replace active false \
+       add emails '[{"value": "bjensen@example.com", "type": "work"}]'
+
+The server answers with the modified resource, or without content.
+
 Delete resources
 ----------------
 
@@ -202,7 +220,7 @@ The :ref:`reference:delete` command allows you to delete resources.
 Act on the authenticated client
 -------------------------------
 
-Pass :option:`--me <scim-query --me>` to :ref:`reference:query`, :ref:`reference:create`, :ref:`reference:replace` or :ref:`reference:delete`
+Pass :option:`--me <scim-query --me>` to :ref:`reference:query`, :ref:`reference:create`, :ref:`reference:replace`, :ref:`reference:modify` or :ref:`reference:delete`
 to act on the resource of the authenticated client, under ``/Me``.
 The server answers with a ``501`` error if it does not support ``/Me``.
 

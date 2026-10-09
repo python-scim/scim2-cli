@@ -19,6 +19,7 @@ from sphinx_click.rst_to_ansi_formatter import make_rst_to_ansi_formatter
 
 from scim2_cli.create import create_cli
 from scim2_cli.delete import delete_cli
+from scim2_cli.modify import modify_cli
 from scim2_cli.query import query_cli
 from scim2_cli.replace import replace_cli
 from scim2_cli.search import search_cli
@@ -155,6 +156,7 @@ def cli(
 cli.add_command(create_cli)
 cli.add_command(query_cli)
 cli.add_command(replace_cli)
+cli.add_command(modify_cli)
 cli.add_command(delete_cli)
 cli.add_command(search_cli)
 cli.add_command(test_cli)

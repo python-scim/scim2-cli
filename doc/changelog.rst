@@ -1,6 +1,17 @@
 Changelog
 =========
 
+[0.6.0] - Unreleased
+--------------------
+
+Added
+^^^^^
+- The ``modify`` command sends a PATCH request (:rfc:`7644#section-3.5.2`).
+  The operations follow the resource type and the id, and are sent in order:
+  ``scim2 modify user 1 replace displayName "Barbara Jensen" remove nickName``.
+  Values of string attributes are passed as is, the other values are passed in JSON.
+  ``scim2 modify --me`` sends the operations to ``/Me``.
+
 [0.5.0] - 2026-10-08
 --------------------
 

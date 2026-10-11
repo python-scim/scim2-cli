@@ -1,3 +1,5 @@
+<img alt="python-scim logo" src="https://raw.githubusercontent.com/python-scim/.github/refs/heads/main/python-scim.svg" height="72" align="right">
+
 # scim2-cli
 
 An utility command line to help you perform requests against a SCIM server, while validating input and response payloads. It also uses [scim2-tester](https://scim2-tester.readthedocs.io) to perform a [SCIM server compliance test](https://scim2-cli.readthedocs.io/en/latest/reference.html#scim-url-test).

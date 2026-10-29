@@ -19,6 +19,10 @@ Changed
   The passing results are green, the deviations yellow, the failures red and the skipped checks gray.
 - The ``test`` command shows the resource type and the attribute of each result.
 
+Fixed
+^^^^^
+- The ``test`` command prints its header before running the checks, instead of after.
+
 [0.6.0] - 2026-10-09
 --------------------
 

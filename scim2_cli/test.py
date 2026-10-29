@@ -64,8 +64,8 @@ def test_cli(
     client.check_response_content_type = check_content_type
     if seed is None:
         seed = secrets.randbelow(2**32)
-    results = check_server(client, seed=seed)
     click.echo(f"Performing a SCIM compliance check on {client.client.base_url} ...")
+    results = check_server(client, seed=seed)
     failed = False
     for result in results:
         outcome = result.status.outcome

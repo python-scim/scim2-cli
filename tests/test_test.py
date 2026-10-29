@@ -1,5 +1,6 @@
 from unittest.mock import patch
 
+import click
 import pytest
 from scim2_tester import CheckResult
 from scim2_tester import Outcome
@@ -255,3 +256,21 @@ def test_seed_must_be_an_integer(runner, httpserver):
     assert result.exit_code == 2
     assert "'abc' is not a valid integer" in result.output
     check_server.assert_not_called()
+
+
+def test_header_is_printed_before_the_checks(runner, httpserver):
+    """The header is printed before the checks run."""
+
+    def check_server(client, seed):
+        click.echo("checks running")
+        return []
+
+    with patch("scim2_cli.test.check_server", check_server):
+        result = runner.invoke(
+            cli, ["--url", httpserver.url_for("/"), "test"], catch_exceptions=False
+        )
+
+    assert result.output.splitlines()[:2] == [
+        f"Performing a SCIM compliance check on {httpserver.url_for('/')} ...",
+        "checks running",
+    ]

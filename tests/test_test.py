@@ -10,76 +10,86 @@ from scim2_cli import cli
 from scim2_cli.test import OUTCOME_COLORS
 
 
-def test_nominal(runner, httpserver):
-    """Test SCIM compliance test."""
-    results = [
-        CheckResult(
-            status=Status.SUCCESS,
-            title="test1",
-            description="description1",
-            reason="reason1",
-            data="data1",
-        ),
-        CheckResult(
-            status=Status.ERROR,
-            title="test2",
-            description="description2",
-            data="data2",
-        ),
-    ]
-    with patch("scim2_cli.test.check_server", side_effect=[results]) as check_server:
-        result = runner.invoke(
+def run_checks(runner, httpserver, results, *options, color=False):
+    with patch("scim2_cli.test.check_server", side_effect=[results]):
+        return runner.invoke(
             cli,
-            ["--url", httpserver.url_for("/"), "test"],
+            ["--url", httpserver.url_for("/"), "test", *options],
             catch_exceptions=False,
+            color=color,
         )
-        seed = check_server.call_args.kwargs["seed"]
-
-        expected_output = f"""Performing a SCIM compliance check on http://localhost:{httpserver.port}/ ...
-SUCCESS    test1
-  reason1
-ERROR      test2
-1 passed, 1 failed (seed {seed})
-"""
-        assert result.output == expected_output
 
 
-def test_verbose(runner, httpserver):
-    """Test SCIM compliance test."""
-    results = [
-        CheckResult(
-            status=Status.SUCCESS,
-            title="test1",
-            description="description1",
-            reason="reason1",
-            data="data1",
+RESULTS = [
+    CheckResult(status=Status.SUCCESS, title="test1", reason="reason1", data="data1"),
+    CheckResult(status=Status.SKIPPED, title="test2", reason="reason2"),
+    CheckResult(status=Status.DEVIATION, title="test3", reason="reason3"),
+    CheckResult(status=Status.ERROR, title="test4", reason="reason4", data="data4"),
+    CheckResult(status=Status.CRITICAL, title="test5", data="data5"),
+]
+
+
+@pytest.mark.parametrize(
+    ("options", "expected_lines"),
+    [
+        pytest.param(
+            [],
+            [
+                "DEVIATION  test3",
+                "  reason3",
+                "ERROR      test4",
+                "  reason4",
+                "CRITICAL   test5",
+            ],
+            id="default",
         ),
-        CheckResult(
-            status=Status.ERROR,
-            title="test2",
-            description="description2",
-            reason="reason2",
-            data="data2",
+        pytest.param(
+            ["-v"],
+            [
+                "SUCCESS    test1",
+                "  reason1",
+                "SKIPPED    test2",
+                "  reason2",
+                "DEVIATION  test3",
+                "  reason3",
+                "ERROR      test4",
+                "  reason4",
+                "CRITICAL   test5",
+            ],
+            id="verbose",
         ),
+        pytest.param(
+            ["-vv"],
+            [
+                "SUCCESS    test1",
+                "  reason1",
+                "  data1",
+                "SKIPPED    test2",
+                "  reason2",
+                "DEVIATION  test3",
+                "  reason3",
+                "ERROR      test4",
+                "  reason4",
+                "  data4",
+                "CRITICAL   test5",
+                "  data5",
+            ],
+            id="very-verbose",
+        ),
+    ],
+)
+def test_verbosity(runner, httpserver, options, expected_lines):
+    """By default, only the warnings and failures are shown.
+
+    -v shows every result with its reason, and -vv also shows the data.
+    """
+    result = run_checks(runner, httpserver, RESULTS, "--seed", "1234", *options)
+
+    assert result.output.splitlines() == [
+        f"Performing a SCIM compliance check on {httpserver.url_for('/')} ...",
+        *expected_lines,
+        "1 passed, 1 warning, 2 failed, 1 skipped (seed 1234)",
     ]
-    with patch("scim2_cli.test.check_server", side_effect=[results]) as check_server:
-        result = runner.invoke(
-            cli,
-            ["--url", httpserver.url_for("/"), "test", "--verbose"],
-            catch_exceptions=False,
-        )
-        seed = check_server.call_args.kwargs["seed"]
-
-        expected_output = f"""Performing a SCIM compliance check on http://localhost:{httpserver.port}/ ...
-SUCCESS    test1
-  reason1
-  data1
-ERROR      test2
-  reason2
-  data2
-1 passed, 1 failed (seed {seed})
-"""
-        assert result.output == expected_output
 
 
 def test_failure(runner, httpserver):
@@ -118,16 +128,6 @@ def test_response_checks_options(runner, httpserver, options, expected):
     assert checked == {"status_codes": expected, "content_type": expected}
 
 
-def run_checks(runner, httpserver, results, *options, color=False):
-    with patch("scim2_cli.test.check_server", side_effect=[results]):
-        return runner.invoke(
-            cli,
-            ["--url", httpserver.url_for("/"), "test", *options],
-            catch_exceptions=False,
-            color=color,
-        )
-
-
 def test_resource_type_and_attribute(runner, httpserver):
     """Each result shows its resource type and its attribute when it has them."""
     results = [
@@ -143,7 +143,7 @@ def test_resource_type_and_attribute(runner, httpserver):
         ),
     ]
 
-    result = run_checks(runner, httpserver, results)
+    result = run_checks(runner, httpserver, results, "-v")
 
     assert result.output.splitlines()[1:-1] == [
         "SUCCESS    discovery_methods",
@@ -206,7 +206,7 @@ def test_status_color_follows_the_outcome(runner, httpserver, status, color):
     """Passing results are green, deviations yellow, failures red and skipped checks gray."""
     results = [CheckResult(status=status, title="check")]
 
-    result = run_checks(runner, httpserver, results, color=True)
+    result = run_checks(runner, httpserver, results, "-v", color=True)
 
     assert f"{color}{status.name}" in result.output
 

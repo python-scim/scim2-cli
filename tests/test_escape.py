@@ -79,7 +79,7 @@ def test_compliance_report_is_escaped(runner, httpserver, field, sequence, escap
 
     with patch("scim2_cli.test.check_server", side_effect=[[result]]):
         output = runner.invoke(
-            cli, ["--url", httpserver.url_for("/"), "test", "--verbose"], color=True
+            cli, ["--url", httpserver.url_for("/"), "test", "-vv"], color=True
         ).output
 
     assert escaped in output

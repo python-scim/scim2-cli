@@ -41,7 +41,12 @@ def summary(outcomes: Counter[Outcome], seed: int) -> str:
 
 @click.command(cls=make_rst_to_ansi_formatter(DOC_URL), name="test")
 @click.pass_context
-@click.option("-v", "--verbose", is_flag=True, help="Enables verbose mode")
+@click.option(
+    "-v",
+    "--verbose",
+    count=True,
+    help="Show every result with its reason. Pass it twice to also show the data.",
+)
 @click.option(
     "--check-status-code/--dont-check-status-code",
     is_flag=True,
@@ -66,7 +71,7 @@ def summary(outcomes: Counter[Outcome], seed: int) -> str:
 )
 def test_cli(
     ctx: click.Context,
-    verbose: bool,
+    verbose: int,
     check_status_code: bool,
     check_content_type: bool,
     strict: bool,
@@ -92,6 +97,8 @@ def test_cli(
         outcomes[outcome] += 1
         if outcome is Outcome.FAILED or (strict and outcome is Outcome.WARNING):
             failed = True
+        if not verbose and outcome in (Outcome.PASSED, Outcome.SKIPPED):
+            continue
         status = click.style(
             result.status.name.ljust(STATUS_WIDTH), fg=OUTCOME_COLORS[outcome]
         )
@@ -104,8 +111,8 @@ def test_cli(
 
         if result.reason:
             click.echo(f"  {escape_control_characters(result.reason)}")
-            if verbose and result.data:
-                click.echo(f"  {escape_control_characters(result.data)}")
+        if verbose > 1 and result.data:
+            click.echo(f"  {escape_control_characters(result.data)}")
 
     if failed:
         color = Color.red

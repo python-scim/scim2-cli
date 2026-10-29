@@ -247,24 +247,34 @@ See the :doc:`scim2-tester documentation <scim2_tester:index>` for more details 
 
     $ scim test
     Performing a SCIM compliance check on http://localhost:8080 ...
+    300 passed (seed 2416347125)
+
+The command only shows the results that warn or fail, with their reasons.
+The last line counts the results that passed, warned, failed and were skipped.
+The command fails with the exit code 1 when a check fails.
+With ``--strict``, it also fails on deviations.
+
+``-v`` shows every result with its reason, and ``-vv`` also shows the data of the results,
+such as the responses of the server.
+Each result shows the status of the check, its title, and the resource type and the attribute it is about:
+
+.. code-block:: console
+   :caption: SCIM compliance test showing every result
+
+    $ scim test -v
+    Performing a SCIM compliance check on http://localhost:8080 ...
     SUCCESS    service_provider_config_endpoint
     SUCCESS    query_all_resource_types
       Resource types available are: 'User', 'Group'
     SUCCESS    query_resource_type_by_id User
       Successfully accessed the /ResourceTypes/User endpoint.
-    SUCCESS    query_resource_type_by_id Group
-      Successfully accessed the /ResourceTypes/Group endpoint.
     ...
     SUCCESS    check_replace_attribute User displayName
     ...
     300 passed (seed 2416347125)
 
-Each result shows the status of the check, its title, and the resource type and the attribute it is about.
 The passing results are green, the deviations from the recommendations of the RFCs are yellow,
 the failures are red and the skipped checks are gray.
-The last line counts the results that passed, warned, failed and were skipped.
-The command fails with the exit code 1 when a check fails.
-With ``--strict``, it also fails on deviations.
 
 The checks send generated values, such as user names and email addresses.
 Each run generates new values, and prints its seed in the summary at the end.

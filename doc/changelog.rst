@@ -20,6 +20,9 @@ Changed
   ``COMPLIANT``, ``ACCEPTABLE``, ``DEVIATION`` and ``SKIPPED`` results used to fail it.
   The passing results are green, the deviations yellow, the failures red and the skipped checks gray.
 - The ``test`` command shows the resource type and the attribute of each result.
+- The ``test`` command only shows the results that warn or fail.
+  ``-v`` shows every result with its reason, and ``-vv`` also shows the data of the results.
+  ``-v`` used to show the data.
 
 Fixed
 ^^^^^

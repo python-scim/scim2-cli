@@ -1,6 +1,14 @@
 Changelog
 =========
 
+[0.7.1] - Unreleased
+--------------------
+
+Changed
+^^^^^^^
+- The ``test`` command prints each result as soon as its check ends, instead of at the end of
+  the run. Requires scim2-tester 0.6.4, which also brings new checks.
+
 [0.7.0] - 2026-10-29
 --------------------
 

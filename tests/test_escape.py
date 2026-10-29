@@ -77,7 +77,7 @@ def test_compliance_report_is_escaped(runner, httpserver, field, sequence, escap
     )
     setattr(result, field, f"{getattr(result, field)}{sequence}")
 
-    with patch("scim2_cli.test.check_server", side_effect=[[result]]):
+    with patch("scim2_cli.test.iter_check_server", side_effect=[[result]]):
         output = runner.invoke(
             cli, ["--url", httpserver.url_for("/"), "test", "-vv"], color=True
         ).output
@@ -146,7 +146,7 @@ def test_line_breaks_and_tabulations_are_kept(runner, httpserver):
     """Line breaks and tabulations are the layout of the messages, not escape sequences."""
     result = CheckResult(status=Status.ERROR, title="check", reason="first\n\tsecond")
 
-    with patch("scim2_cli.test.check_server", side_effect=[[result]]):
+    with patch("scim2_cli.test.iter_check_server", side_effect=[[result]]):
         output = runner.invoke(
             cli, ["--url", httpserver.url_for("/"), "test"], color=True
         ).output

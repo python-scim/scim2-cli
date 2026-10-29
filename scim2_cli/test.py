@@ -5,7 +5,7 @@ from collections import Counter
 import click
 from scim2_tester import Outcome
 from scim2_tester import Status
-from scim2_tester import check_server
+from scim2_tester import iter_check_server
 from sphinx_click.rst_to_ansi_formatter import make_rst_to_ansi_formatter
 
 from .utils import DOC_URL
@@ -89,7 +89,7 @@ def test_cli(
     if seed is None:
         seed = secrets.randbelow(2**32)
     click.echo(f"Performing a SCIM compliance check on {client.client.base_url} ...")
-    results = check_server(client, seed=seed)
+    results = iter_check_server(client, seed=seed)
     failed = False
     outcomes: Counter[Outcome] = Counter()
     for result in results:

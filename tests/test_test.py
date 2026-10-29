@@ -11,7 +11,7 @@ from scim2_cli.test import OUTCOME_COLORS
 
 
 def run_checks(runner, httpserver, results, *options, color=False):
-    with patch("scim2_cli.test.check_server", side_effect=[results]):
+    with patch("scim2_cli.test.iter_check_server", side_effect=[results]):
         return runner.invoke(
             cli,
             ["--url", httpserver.url_for("/"), "test", *options],
@@ -112,12 +112,12 @@ def test_response_checks_options(runner, httpserver, options, expected):
     """Test that the response check options are applied on the client."""
     checked = {}
 
-    def check_server(client, seed):
+    def iter_check_server(client, seed):
         checked["status_codes"] = client.check_response_status_codes
         checked["content_type"] = client.check_response_content_type
         return []
 
-    with patch("scim2_cli.test.check_server", check_server):
+    with patch("scim2_cli.test.iter_check_server", iter_check_server):
         result = runner.invoke(
             cli,
             ["--url", httpserver.url_for("/"), "test", *options],
@@ -218,14 +218,16 @@ def test_every_outcome_has_a_color():
 
 def test_seed_is_sent_and_printed(runner, httpserver):
     """The seed passed with --seed generates the values, and is printed at the end."""
-    with patch("scim2_cli.test.check_server", return_value=[]) as check_server:
+    with patch(
+        "scim2_cli.test.iter_check_server", return_value=[]
+    ) as iter_check_server:
         result = runner.invoke(
             cli,
             ["--url", httpserver.url_for("/"), "test", "--seed", "1234"],
             catch_exceptions=False,
         )
 
-    assert check_server.call_args.kwargs["seed"] == 1234
+    assert iter_check_server.call_args.kwargs["seed"] == 1234
     assert result.output.splitlines()[-1] == "no checks ran (seed 1234)"
 
 
@@ -233,13 +235,15 @@ def test_each_run_has_its_own_seed(runner, httpserver):
     """Without --seed, each run draws a new seed and prints it."""
     seeds = []
     for _ in range(2):
-        with patch("scim2_cli.test.check_server", return_value=[]) as check_server:
+        with patch(
+            "scim2_cli.test.iter_check_server", return_value=[]
+        ) as iter_check_server:
             result = runner.invoke(
                 cli,
                 ["--url", httpserver.url_for("/"), "test"],
                 catch_exceptions=False,
             )
-        seed = check_server.call_args.kwargs["seed"]
+        seed = iter_check_server.call_args.kwargs["seed"]
         assert result.output.splitlines()[-1] == f"no checks ran (seed {seed})"
         seeds.append(seed)
 
@@ -248,24 +252,24 @@ def test_each_run_has_its_own_seed(runner, httpserver):
 
 def test_seed_must_be_an_integer(runner, httpserver):
     """A seed that is not an integer is a usage error."""
-    with patch("scim2_cli.test.check_server") as check_server:
+    with patch("scim2_cli.test.iter_check_server") as iter_check_server:
         result = runner.invoke(
             cli, ["--url", httpserver.url_for("/"), "test", "--seed", "abc"]
         )
 
     assert result.exit_code == 2
     assert "'abc' is not a valid integer" in result.output
-    check_server.assert_not_called()
+    iter_check_server.assert_not_called()
 
 
 def test_header_is_printed_before_the_checks(runner, httpserver):
     """The header is printed before the checks run."""
 
-    def check_server(client, seed):
+    def iter_check_server(client, seed):
         click.echo("checks running")
         return []
 
-    with patch("scim2_cli.test.check_server", check_server):
+    with patch("scim2_cli.test.iter_check_server", iter_check_server):
         result = runner.invoke(
             cli, ["--url", httpserver.url_for("/"), "test"], catch_exceptions=False
         )
@@ -273,6 +277,26 @@ def test_header_is_printed_before_the_checks(runner, httpserver):
     assert result.output.splitlines()[:2] == [
         f"Performing a SCIM compliance check on {httpserver.url_for('/')} ...",
         "checks running",
+    ]
+
+
+def test_results_are_printed_as_soon_as_they_arrive(runner, httpserver):
+    """Each result is printed before the next check runs."""
+
+    def iter_check_server(client, seed):
+        yield CheckResult(status=Status.ERROR, title="test1")
+        click.echo("next check running")
+        yield CheckResult(status=Status.ERROR, title="test2")
+
+    with patch("scim2_cli.test.iter_check_server", iter_check_server):
+        result = runner.invoke(
+            cli, ["--url", httpserver.url_for("/"), "test"], catch_exceptions=False
+        )
+
+    assert result.output.splitlines()[1:4] == [
+        "ERROR      test1",
+        "next check running",
+        "ERROR      test2",
     ]
 
 

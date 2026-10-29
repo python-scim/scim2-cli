@@ -257,12 +257,21 @@ See the :doc:`scim2-tester documentation <scim2_tester:index>` for more details 
     ...
     SUCCESS    check_replace_attribute User displayName
     ...
+    Seed: 2416347125
 
 Each result shows the status of the check, its title, and the resource type and the attribute it is about.
 The passing results are green, the deviations from the recommendations of the RFCs are yellow,
 the failures are red and the skipped checks are gray.
 The command fails with the exit code 1 when a check fails.
 With ``--strict``, it also fails on deviations.
+
+The checks send generated values, such as user names and email addresses.
+Each run generates new values, and prints its seed at the end.
+To send the same values again, for instance to replay a failure, pass the seed with ``--seed``:
+
+.. code-block:: console
+
+    $ scim test --seed 2416347125
 
 Errors
 ------

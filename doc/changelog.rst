@@ -8,6 +8,7 @@ Added
 ^^^^^
 - Support for Python 3.15.
 - ``test --strict`` fails on deviations from the recommendations of the RFCs.
+- ``test --seed`` sends the same generated values as a previous run. Each run prints its seed.
 
 Changed
 ^^^^^^^

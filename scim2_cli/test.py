@@ -1,3 +1,4 @@
+import secrets
 import sys
 
 import click
@@ -39,12 +40,18 @@ STATUS_WIDTH = max(len(status.name) for status in Status)
     is_flag=True,
     help="Fail on deviations from the recommendations of the RFCs.",
 )
+@click.option(
+    "--seed",
+    type=int,
+    help="Send the same generated values as the run that printed this seed.",
+)
 def test_cli(
     ctx: click.Context,
     verbose: bool,
     check_status_code: bool,
     check_content_type: bool,
     strict: bool,
+    seed: int | None,
 ) -> None:
     """Perform a server SCIM compliance check using :doc:`scim2-tester <scim2_tester:index>`.
 
@@ -55,7 +62,9 @@ def test_cli(
     client = ctx.obj.client
     client.check_response_status_codes = check_status_code
     client.check_response_content_type = check_content_type
-    results = check_server(client)
+    if seed is None:
+        seed = secrets.randbelow(2**32)
+    results = check_server(client, seed=seed)
     click.echo(f"Performing a SCIM compliance check on {client.client.base_url} ...")
     failed = False
     for result in results:
@@ -77,4 +86,5 @@ def test_cli(
             if verbose and result.data:
                 click.echo(f"  {escape_control_characters(result.data)}")
 
+    click.echo(f"Seed: {seed}")
     sys.exit(1 if failed else 0)

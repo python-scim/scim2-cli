@@ -26,17 +26,19 @@ def test_nominal(runner, httpserver):
             data="data2",
         ),
     ]
-    with patch("scim2_cli.test.check_server", side_effect=[results]):
+    with patch("scim2_cli.test.check_server", side_effect=[results]) as check_server:
         result = runner.invoke(
             cli,
             ["--url", httpserver.url_for("/"), "test"],
             catch_exceptions=False,
         )
+        seed = check_server.call_args.kwargs["seed"]
 
         expected_output = f"""Performing a SCIM compliance check on http://localhost:{httpserver.port}/ ...
 SUCCESS    test1
   reason1
 ERROR      test2
+Seed: {seed}
 """
         assert result.output == expected_output
 
@@ -59,12 +61,13 @@ def test_verbose(runner, httpserver):
             data="data2",
         ),
     ]
-    with patch("scim2_cli.test.check_server", side_effect=[results]):
+    with patch("scim2_cli.test.check_server", side_effect=[results]) as check_server:
         result = runner.invoke(
             cli,
             ["--url", httpserver.url_for("/"), "test", "--verbose"],
             catch_exceptions=False,
         )
+        seed = check_server.call_args.kwargs["seed"]
 
         expected_output = f"""Performing a SCIM compliance check on http://localhost:{httpserver.port}/ ...
 SUCCESS    test1
@@ -73,6 +76,7 @@ SUCCESS    test1
 ERROR      test2
   reason2
   data2
+Seed: {seed}
 """
         assert result.output == expected_output
 
@@ -97,7 +101,7 @@ def test_response_checks_options(runner, httpserver, options, expected):
     """Test that the response check options are applied on the client."""
     checked = {}
 
-    def check_server(client):
+    def check_server(client, seed):
         checked["status_codes"] = client.check_response_status_codes
         checked["content_type"] = client.check_response_content_type
         return []
@@ -140,7 +144,7 @@ def test_resource_type_and_attribute(runner, httpserver):
 
     result = run_checks(runner, httpserver, results)
 
-    assert result.output.splitlines()[1:] == [
+    assert result.output.splitlines()[1:-1] == [
         "SUCCESS    discovery_methods",
         "SUCCESS    object_creation User",
         "SUCCESS    check_replace_attribute User name.familyName",
@@ -209,3 +213,45 @@ def test_status_color_follows_the_outcome(runner, httpserver, status, color):
 def test_every_outcome_has_a_color():
     """Each outcome of scim2-tester has a color."""
     assert set(OUTCOME_COLORS) == set(Outcome)
+
+
+def test_seed_is_sent_and_printed(runner, httpserver):
+    """The seed passed with --seed generates the values, and is printed at the end."""
+    with patch("scim2_cli.test.check_server", return_value=[]) as check_server:
+        result = runner.invoke(
+            cli,
+            ["--url", httpserver.url_for("/"), "test", "--seed", "1234"],
+            catch_exceptions=False,
+        )
+
+    assert check_server.call_args.kwargs["seed"] == 1234
+    assert result.output.splitlines()[-1] == "Seed: 1234"
+
+
+def test_each_run_has_its_own_seed(runner, httpserver):
+    """Without --seed, each run draws a new seed and prints it."""
+    seeds = []
+    for _ in range(2):
+        with patch("scim2_cli.test.check_server", return_value=[]) as check_server:
+            result = runner.invoke(
+                cli,
+                ["--url", httpserver.url_for("/"), "test"],
+                catch_exceptions=False,
+            )
+        seed = check_server.call_args.kwargs["seed"]
+        assert result.output.splitlines()[-1] == f"Seed: {seed}"
+        seeds.append(seed)
+
+    assert seeds[0] != seeds[1]
+
+
+def test_seed_must_be_an_integer(runner, httpserver):
+    """A seed that is not an integer is a usage error."""
+    with patch("scim2_cli.test.check_server") as check_server:
+        result = runner.invoke(
+            cli, ["--url", httpserver.url_for("/"), "test", "--seed", "abc"]
+        )
+
+    assert result.exit_code == 2
+    assert "'abc' is not a valid integer" in result.output
+    check_server.assert_not_called()

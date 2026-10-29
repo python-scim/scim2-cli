@@ -1,6 +1,7 @@
 import sys
 
 import click
+from scim2_tester import Outcome
 from scim2_tester import Status
 from scim2_tester import check_server
 from sphinx_click.rst_to_ansi_formatter import make_rst_to_ansi_formatter
@@ -8,6 +9,14 @@ from sphinx_click.rst_to_ansi_formatter import make_rst_to_ansi_formatter
 from .utils import DOC_URL
 from .utils import Color
 from .utils import escape_control_characters
+
+OUTCOME_COLORS = {
+    Outcome.PASSED: Color.green,
+    Outcome.WARNING: Color.yellow,
+    Outcome.FAILED: Color.red,
+    Outcome.SKIPPED: Color.bright_black,
+}
+STATUS_WIDTH = max(len(status.name) for status in Status)
 
 
 @click.command(cls=make_rst_to_ansi_formatter(DOC_URL), name="test")
@@ -25,8 +34,17 @@ from .utils import escape_control_characters
     default=True,
     help="Fail on unexpected content types.",
 )
+@click.option(
+    "--strict",
+    is_flag=True,
+    help="Fail on deviations from the recommendations of the RFCs.",
+)
 def test_cli(
-    ctx: click.Context, verbose: bool, check_status_code: bool, check_content_type: bool
+    ctx: click.Context,
+    verbose: bool,
+    check_status_code: bool,
+    check_content_type: bool,
+    strict: bool,
 ) -> None:
     """Perform a server SCIM compliance check using :doc:`scim2-tester <scim2_tester:index>`.
 
@@ -39,18 +57,24 @@ def test_cli(
     client.check_response_content_type = check_content_type
     results = check_server(client)
     click.echo(f"Performing a SCIM compliance check on {client.client.base_url} ...")
-    success = True
+    failed = False
     for result in results:
-        if result.status == Status.SUCCESS:
-            status = click.style(result.status.name, fg=Color.green)
-        else:
-            status = click.style(result.status.name, fg=Color.red)
-            success = False
-        click.echo(f"{status} {escape_control_characters(result.title)}")
+        outcome = result.status.outcome
+        if outcome is Outcome.FAILED or (strict and outcome is Outcome.WARNING):
+            failed = True
+        status = click.style(
+            result.status.name.ljust(STATUS_WIDTH), fg=OUTCOME_COLORS[outcome]
+        )
+        label = " ".join(
+            escape_control_characters(part)
+            for part in (result.title, result.resource_type, result.attribute)
+            if part
+        )
+        click.echo(f"{status} {label}")
 
         if result.reason:
             click.echo(f"  {escape_control_characters(result.reason)}")
             if verbose and result.data:
                 click.echo(f"  {escape_control_characters(result.data)}")
 
-    sys.exit(0 if success else 1)
+    sys.exit(1 if failed else 0)

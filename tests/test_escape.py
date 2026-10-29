@@ -61,12 +61,19 @@ def hostile_configuration(tmp_path, sequence):
     return arguments
 
 
-@pytest.mark.parametrize("field", ["title", "reason", "data"])
+@pytest.mark.parametrize(
+    "field", ["title", "resource_type", "attribute", "reason", "data"]
+)
 @pytest.mark.parametrize(("sequence", "escaped"), HOSTILE_SEQUENCES)
 def test_compliance_report_is_escaped(runner, httpserver, field, sequence, escaped):
     """The server cannot rewrite the compliance report on the terminal."""
     result = CheckResult(
-        status=Status.ERROR, title="object_creation", reason="failed", data="payload"
+        status=Status.ERROR,
+        title="check_replace_attribute",
+        resource_type="User",
+        attribute="nickName",
+        reason="failed",
+        data="payload",
     )
     setattr(result, field, f"{getattr(result, field)}{sequence}")
 

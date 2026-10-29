@@ -247,14 +247,22 @@ See the :doc:`scim2-tester documentation <scim2_tester:index>` for more details 
 
     $ scim test
     Performing a SCIM compliance check on http://localhost:8080 ...
-    SUCCESS check_service_provider_config_endpoint
-    SUCCESS check_query_all_resource_types
-    SUCCESS check_query_resource_type_by_id
+    SUCCESS    service_provider_config_endpoint
+    SUCCESS    query_all_resource_types
+      Resource types available are: 'User', 'Group'
+    SUCCESS    query_resource_type_by_id User
       Successfully accessed the /ResourceTypes/User endpoint.
-    SUCCESS check_query_resource_type_by_id
+    SUCCESS    query_resource_type_by_id Group
       Successfully accessed the /ResourceTypes/Group endpoint.
-    SUCCESS check_access_invalid_resource_typ
     ...
+    SUCCESS    check_replace_attribute User displayName
+    ...
+
+Each result shows the status of the check, its title, and the resource type and the attribute it is about.
+The passing results are green, the deviations from the recommendations of the RFCs are yellow,
+the failures are red and the skipped checks are gray.
+The command fails with the exit code 1 when a check fails.
+With ``--strict``, it also fails on deviations.
 
 Errors
 ------

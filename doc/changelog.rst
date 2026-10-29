@@ -7,11 +7,16 @@ Changelog
 Added
 ^^^^^
 - Support for Python 3.15.
+- ``test --strict`` fails on deviations from the recommendations of the RFCs.
 
 Changed
 ^^^^^^^
 - Requires scim2-client 0.14 and scim2-tester 0.6.3. The ``test`` command runs the new checks of
   scim2-tester.
+- The ``test`` command fails only on ``ERROR`` and ``CRITICAL`` results.
+  ``COMPLIANT``, ``ACCEPTABLE``, ``DEVIATION`` and ``SKIPPED`` results used to fail it.
+  The passing results are green, the deviations yellow, the failures red and the skipped checks gray.
+- The ``test`` command shows the resource type and the attribute of each result.
 
 [0.6.0] - 2026-10-09
 --------------------

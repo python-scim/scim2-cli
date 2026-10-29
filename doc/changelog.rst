@@ -1,7 +1,7 @@
 Changelog
 =========
 
-[0.7.0] - Unreleased
+[0.7.0] - 2026-10-29
 --------------------
 
 Added
@@ -18,11 +18,10 @@ Changed
   scim2-tester.
 - The ``test`` command fails only on ``ERROR`` and ``CRITICAL`` results.
   ``COMPLIANT``, ``ACCEPTABLE``, ``DEVIATION`` and ``SKIPPED`` results used to fail it.
-  The passing results are green, the deviations yellow, the failures red and the skipped checks gray.
-- The ``test`` command shows the resource type and the attribute of each result.
-- The ``test`` command only shows the results that warn or fail.
-  ``-v`` shows every result with its reason, and ``-vv`` also shows the data of the results.
-  ``-v`` used to show the data.
+- The ``test`` command only shows the results that warn or fail, with the resource type and the
+  attribute of each result. The passing results are green, the deviations yellow, the failures red
+  and the skipped checks gray. ``-v`` shows every result with its reason, and ``-vv`` also shows
+  the data of the results. ``-v`` used to show the data.
 
 Fixed
 ^^^^^

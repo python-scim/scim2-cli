@@ -8,7 +8,9 @@ Added
 ^^^^^
 - Support for Python 3.15.
 - ``test --strict`` fails on deviations from the recommendations of the RFCs.
-- ``test --seed`` sends the same generated values as a previous run. Each run prints its seed.
+- ``test --seed`` sends the same generated values as a previous run.
+- The ``test`` command ends with a summary, such as ``298 passed, 1 warning, 1 failed (seed 1234)``.
+  It counts the results of each outcome, and gives the seed of the run.
 
 Changed
 ^^^^^^^

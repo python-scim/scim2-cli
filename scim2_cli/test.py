@@ -1,5 +1,6 @@
 import secrets
 import sys
+from collections import Counter
 
 import click
 from scim2_tester import Outcome
@@ -17,7 +18,25 @@ OUTCOME_COLORS = {
     Outcome.FAILED: Color.red,
     Outcome.SKIPPED: Color.bright_black,
 }
+OUTCOME_LABELS = {
+    Outcome.PASSED: ("passed", "passed"),
+    Outcome.WARNING: ("warning", "warnings"),
+    Outcome.FAILED: ("failed", "failed"),
+    Outcome.SKIPPED: ("skipped", "skipped"),
+}
 STATUS_WIDTH = max(len(status.name) for status in Status)
+
+
+def summary(outcomes: Counter[Outcome], seed: int) -> str:
+    """Count the results of each outcome, in the order of the outcomes."""
+    counts = []
+    for outcome in Outcome:
+        count = outcomes[outcome]
+        if not count:
+            continue
+        singular, plural = OUTCOME_LABELS[outcome]
+        counts.append(f"{count} {plural if count > 1 else singular}")
+    return f"{', '.join(counts) or 'no checks ran'} (seed {seed})"
 
 
 @click.command(cls=make_rst_to_ansi_formatter(DOC_URL), name="test")
@@ -67,8 +86,10 @@ def test_cli(
     click.echo(f"Performing a SCIM compliance check on {client.client.base_url} ...")
     results = check_server(client, seed=seed)
     failed = False
+    outcomes: Counter[Outcome] = Counter()
     for result in results:
         outcome = result.status.outcome
+        outcomes[outcome] += 1
         if outcome is Outcome.FAILED or (strict and outcome is Outcome.WARNING):
             failed = True
         status = click.style(
@@ -86,5 +107,11 @@ def test_cli(
             if verbose and result.data:
                 click.echo(f"  {escape_control_characters(result.data)}")
 
-    click.echo(f"Seed: {seed}")
+    if failed:
+        color = Color.red
+    elif outcomes[Outcome.WARNING] or not outcomes:
+        color = Color.yellow
+    else:
+        color = Color.green
+    click.secho(summary(outcomes, seed), fg=color)
     sys.exit(1 if failed else 0)

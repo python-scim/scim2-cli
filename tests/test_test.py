@@ -39,7 +39,7 @@ def test_nominal(runner, httpserver):
 SUCCESS    test1
   reason1
 ERROR      test2
-Seed: {seed}
+1 passed, 1 failed (seed {seed})
 """
         assert result.output == expected_output
 
@@ -77,7 +77,7 @@ SUCCESS    test1
 ERROR      test2
   reason2
   data2
-Seed: {seed}
+1 passed, 1 failed (seed {seed})
 """
         assert result.output == expected_output
 
@@ -226,7 +226,7 @@ def test_seed_is_sent_and_printed(runner, httpserver):
         )
 
     assert check_server.call_args.kwargs["seed"] == 1234
-    assert result.output.splitlines()[-1] == "Seed: 1234"
+    assert result.output.splitlines()[-1] == "no checks ran (seed 1234)"
 
 
 def test_each_run_has_its_own_seed(runner, httpserver):
@@ -240,7 +240,7 @@ def test_each_run_has_its_own_seed(runner, httpserver):
                 catch_exceptions=False,
             )
         seed = check_server.call_args.kwargs["seed"]
-        assert result.output.splitlines()[-1] == f"Seed: {seed}"
+        assert result.output.splitlines()[-1] == f"no checks ran (seed {seed})"
         seeds.append(seed)
 
     assert seeds[0] != seeds[1]
@@ -274,3 +274,49 @@ def test_header_is_printed_before_the_checks(runner, httpserver):
         f"Performing a SCIM compliance check on {httpserver.url_for('/')} ...",
         "checks running",
     ]
+
+
+@pytest.mark.parametrize(
+    ("statuses", "expected"),
+    [
+        ([Status.SUCCESS], "1 passed"),
+        (
+            [Status.SUCCESS, Status.COMPLIANT, Status.ACCEPTABLE],
+            "3 passed",
+        ),
+        ([Status.DEVIATION], "1 warning"),
+        ([Status.DEVIATION, Status.DEVIATION], "2 warnings"),
+        (
+            [Status.SKIPPED, Status.CRITICAL, Status.DEVIATION, Status.SUCCESS],
+            "1 passed, 1 warning, 1 failed, 1 skipped",
+        ),
+        ([Status.ERROR, Status.CRITICAL, Status.SKIPPED], "2 failed, 1 skipped"),
+        ([], "no checks ran"),
+    ],
+)
+def test_summary_counts_the_outcomes(runner, httpserver, statuses, expected):
+    """The last line counts the results of each outcome, and gives the seed."""
+    results = [CheckResult(status=status, title="check") for status in statuses]
+
+    result = run_checks(runner, httpserver, results, "--seed", "1234")
+
+    assert result.output.splitlines()[-1] == f"{expected} (seed 1234)"
+
+
+@pytest.mark.parametrize(
+    ("statuses", "options", "color"),
+    [
+        ([Status.SUCCESS, Status.SKIPPED], [], "\x1b[32m"),
+        ([Status.SUCCESS, Status.DEVIATION], [], "\x1b[33m"),
+        ([Status.SUCCESS, Status.DEVIATION], ["--strict"], "\x1b[31m"),
+        ([Status.DEVIATION, Status.ERROR], [], "\x1b[31m"),
+        ([], [], "\x1b[33m"),
+    ],
+)
+def test_summary_color_follows_the_run(runner, httpserver, statuses, options, color):
+    """The summary is red when the run fails, yellow on warnings or without checks, green otherwise."""
+    results = [CheckResult(status=status, title="check") for status in statuses]
+
+    result = run_checks(runner, httpserver, results, *options, color=True)
+
+    assert result.output.splitlines()[-1].startswith(color)

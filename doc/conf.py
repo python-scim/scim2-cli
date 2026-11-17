@@ -36,8 +36,6 @@ copyright = f"{year}, Yaal Coop"
 author = "Yaal Coop"
 source_suffix = {
     ".rst": "restructuredtext",
-    ".txt": "markdown",
-    ".md": "markdown",
 }
 
 version = metadata.version("scim2_cli")

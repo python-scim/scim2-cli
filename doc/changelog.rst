@@ -146,8 +146,8 @@ Security
   the server cannot rewrite the output on the terminal with escape sequences. This covers
   the :ref:`reference:test` report, the error messages, the subcommand names and the
   option help taken from the schema descriptions.
-- The documentation and the :option:`--header <scim --header>` help recommend passing the
-  authentication tokens with :ref:`SCIM_CLI_HEADERS <scim-header-scim_cli_headers>`, as other
+- The documentation and the :option:`--header <scim2 --header>` help recommend passing the
+  authentication tokens with :ref:`SCIM_CLI_HEADERS <scim2-header-scim_cli_headers>`, as other
   users of the machine can see the command line arguments.
 
 [0.3.0] - 2026-09-20
@@ -213,7 +213,7 @@ Added
 - Python 3.13 support.
 - :class:`~scim2_models.Schema`, :class:`~scim2_models.ResourceType` and :class:`~scim2_models.ServiceProviderConfig` are now automatically discovered on the server.
 - Available resources are discovered on the server.
-- Implement :ref:`SCIM_CLI_URL <scim-url-scim_cli_url>` and :ref:`SCIM_CLI_HEADERS <scim-header-scim_cli_headers>` environment vars.
+- Implement :ref:`SCIM_CLI_URL <scim2-url-scim_cli_url>` and :ref:`SCIM_CLI_HEADERS <scim2-header-scim_cli_headers>` environment vars.
 
 [0.1.4] - 2024-07-26
 --------------------

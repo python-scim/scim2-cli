@@ -2,7 +2,7 @@
 
 # scim2-cli
 
-An utility command line to help you perform requests against a SCIM server, while validating input and response payloads. It also uses [scim2-tester](https://scim2-tester.readthedocs.io) to perform a [SCIM server compliance test](https://scim2-cli.readthedocs.io/en/latest/reference.html#scim-url-test).
+An utility command line to help you perform requests against a SCIM server, while validating input and response payloads. It also uses [scim2-tester](https://scim2-tester.readthedocs.io) to perform a [SCIM server compliance test](https://scim2-cli.readthedocs.io/en/latest/reference.html#scim2-test).
 
 ## What's SCIM anyway?
 

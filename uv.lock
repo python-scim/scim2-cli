@@ -1430,7 +1430,6 @@ dev = [
     { name = "tox-uv" },
 ]
 doc = [
-    { name = "myst-parser" },
     { name = "shibuya" },
     { name = "sphinx", version = "9.0.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
     { name = "sphinx", version = "9.1.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
@@ -1462,7 +1461,6 @@ dev = [
     { name = "tox-uv", specifier = ">=1.16.0" },
 ]
 doc = [
-    { name = "myst-parser", specifier = ">=3.0.1" },
     { name = "shibuya", specifier = ">=2024.5.15" },
     { name = "sphinx", specifier = ">=7.3.7" },
     { name = "sphinx-click", specifier = ">=6.0.0" },

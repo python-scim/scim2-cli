@@ -1,6 +1,8 @@
 import json
 import sys
+from collections.abc import Callable
 from functools import cached_property
+from functools import partial
 from typing import IO
 from typing import Any
 from typing import TypeVar
@@ -23,16 +25,26 @@ from scim2_cli.utils import escape_control_characters
 from scim2_cli.utils import exception_to_click_error
 
 ResourceT = TypeVar("ResourceT", bound=Resource[Any])
+T = TypeVar("T")
 
 
-def load_objects(fd: IO[str], model: type[ResourceT]) -> list[ResourceT]:
-    """Read a list of objects, bare or wrapped in a ListResponse, from a JSON file."""
-    payload = json.load(fd)
+def load_file(fd: IO[str], load: Callable[[Any], T]) -> T:
+    """Read a configuration file, and fail with a readable error if its content is invalid."""
+    try:
+        return load(json.load(fd))
+    except ValueError as exc:
+        raise ClickException(f"Invalid file {fd.name}.\n{exc}") from exc
+
+
+def load_objects(payload: Any, model: type[ResourceT]) -> list[ResourceT]:
+    """Read a list of objects, bare or wrapped in a ListResponse."""
     if isinstance(payload, dict):
         list_response: ListResponse[ResourceT] = cast(Any, ListResponse)[
             model
         ].model_validate(payload)
         return list_response.resources or []
+    if not isinstance(payload, list):
+        raise ValueError("Expected a list of objects, or a ListResponse.")
     return [model.model_validate(item) for item in payload]
 
 
@@ -44,7 +56,7 @@ def describe_server(
 ) -> ScimProvider:
     """Describe the server with the configuration files, and query it for the others."""
     resource_types = (
-        load_objects(resource_types_fd, ResourceType)
+        load_file(resource_types_fd, partial(load_objects, model=ResourceType))
         if resource_types_fd
         else cast(
             "ListResponse[ResourceType]", scim_client.query(ResourceType)
@@ -52,12 +64,12 @@ def describe_server(
         or []
     )
     schemas = (
-        load_objects(schemas_fd, Schema)
+        load_file(schemas_fd, partial(load_objects, model=Schema))
         if schemas_fd
         else cast("ListResponse[Schema]", scim_client.query(Schema)).resources or []
     )
     config = (
-        ServiceProviderConfig.model_validate(json.load(service_provider_config_fd))
+        load_file(service_provider_config_fd, ServiceProviderConfig.model_validate)
         if service_provider_config_fd
         else cast(ServiceProviderConfig, scim_client.query(ServiceProviderConfig))
     )

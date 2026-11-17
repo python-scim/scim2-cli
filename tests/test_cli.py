@@ -533,3 +533,30 @@ def test_server_is_discovered_once(runner, httpserver, simple_user_payload):
         "/Schemas",
         "/ServiceProviderConfig",
     ]
+
+
+@pytest.mark.parametrize(
+    "option", ["--schemas", "--resource-types", "--service-provider-config"]
+)
+@pytest.mark.parametrize(
+    "content",
+    [
+        pytest.param("", id="empty"),
+        pytest.param("{not json", id="invalid-json"),
+        pytest.param("42", id="not-an-object"),
+        pytest.param('{"schemas": 42}', id="invalid-object"),
+    ],
+)
+def test_invalid_configuration_file(runner, httpserver, tmp_path, option, content):
+    """A configuration file that cannot be read gives an error naming the file."""
+    path = tmp_path / "configuration.json"
+    path.write_text(content)
+
+    result = runner.invoke(
+        cli,
+        ["--url", httpserver.url_for("/"), option, str(path), "query", "user"],
+        catch_exceptions=False,
+    )
+
+    assert result.exit_code == 1, result.output
+    assert f"Error: Invalid file {path}." in result.output

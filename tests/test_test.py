@@ -129,8 +129,8 @@ def test_response_checks_options(runner, httpserver, options, expected):
     assert checked == {"status_codes": expected, "content_type": expected}
 
 
-def test_resource_type_and_attribute(runner, httpserver):
-    """Each result shows its resource type and its attribute when it has them."""
+def test_results_show_their_id(runner, httpserver):
+    """Each result shows its id, with its resource type and its attribute when it has them."""
     results = [
         CheckResult(status=Status.SUCCESS, title="discovery_methods"),
         CheckResult(
@@ -148,8 +148,8 @@ def test_resource_type_and_attribute(runner, httpserver):
 
     assert result.output.splitlines()[1:-1] == [
         "SUCCESS    discovery_methods",
-        "SUCCESS    object_creation User",
-        "SUCCESS    check_replace_attribute User name.familyName",
+        "SUCCESS    object_creation[User]",
+        "SUCCESS    check_replace_attribute[User][name.familyName]",
     ]
 
 

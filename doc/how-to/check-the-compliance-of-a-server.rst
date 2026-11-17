@@ -27,7 +27,8 @@ The last line counts the results that passed, warned, failed and were skipped.
 
 ``-v`` shows every result with its reason, and ``-vv`` also shows the data of the results,
 such as the responses of the server.
-Each result shows the status of the check, its title, and the resource type and the attribute it is about:
+Each result shows its status and its id.
+The id holds the title of the check, and the resource type and the attribute it is about:
 
 .. code-block:: console
    :caption: SCIM compliance test showing every result
@@ -37,10 +38,10 @@ Each result shows the status of the check, its title, and the resource type and 
     SUCCESS    service_provider_config_endpoint
     SUCCESS    query_all_resource_types
       Resource types available are: 'User', 'Group'
-    SUCCESS    query_resource_type_by_id User
+    SUCCESS    query_resource_type_by_id[User]
       Successfully accessed the /ResourceTypes/User endpoint.
     ...
-    SUCCESS    check_replace_attribute User displayName
+    SUCCESS    check_replace_attribute[User][displayName]
       Successfully replaced attribute 'displayName'
     ...
     300 passed (seed 2416347125)

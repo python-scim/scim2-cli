@@ -4,6 +4,12 @@ Changelog
 [Unreleased]
 ------------
 
+Changed
+^^^^^^^
+- The text output of the ``test`` command shows the id of each result, such as
+  ``check_replace_attribute[User][displayName]``, instead of its title, resource type and attribute
+  separated by spaces. It is the ``id`` of the ``--format jsonl`` output.
+
 Fixed
 ^^^^^
 - An invalid ``--schemas``, ``--resource-types`` or ``--service-provider-config`` file gives an error

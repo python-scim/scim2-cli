@@ -50,12 +50,7 @@ def echo_text(result: CheckResult, verbose: int) -> None:
     status = click.style(
         result.status.name.ljust(STATUS_WIDTH), fg=OUTCOME_COLORS[outcome]
     )
-    label = " ".join(
-        escape_control_characters(part)
-        for part in (result.title, result.resource_type, result.attribute)
-        if part
-    )
-    click.echo(f"{status} {label}")
+    click.echo(f"{status} {escape_control_characters(result.id)}")
 
     if result.reason:
         click.echo(f"  {escape_control_characters(result.reason)}")

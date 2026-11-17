@@ -10,6 +10,7 @@ from typing import cast
 
 from click import ClickException
 from httpx2 import Client
+from pydantic import ValidationError
 from scim2_client.engines.httpx2 import SyncSCIMClient
 from scim2_models import ListResponse
 from scim2_models import Resource
@@ -28,24 +29,40 @@ ResourceT = TypeVar("ResourceT", bound=Resource[Any])
 T = TypeVar("T")
 
 
+LIST_RESPONSE_SCHEMA = "urn:ietf:params:scim:api:messages:2.0:ListResponse"
+
+
+def error_details(exc: Exception) -> str:
+    """Describe why the content of a file is invalid."""
+    if not isinstance(exc, ValidationError):
+        return str(exc)
+    return "\n".join(
+        f"{'.'.join(str(part) for part in error['loc']) or 'root'}: {error['msg']}"
+        for error in exc.errors(include_url=False)
+    )
+
+
 def load_file(fd: IO[str], load: Callable[[Any], T]) -> T:
     """Read a configuration file, and fail with a readable error if its content is invalid."""
     try:
         return load(json.load(fd))
-    except ValueError as exc:
-        raise ClickException(f"Invalid file {fd.name}.\n{exc}") from exc
+    except (ValueError, RecursionError) as exc:
+        raise ClickException(
+            escape_control_characters(f"Invalid file {fd.name}.\n{error_details(exc)}")
+        ) from exc
 
 
 def load_objects(payload: Any, model: type[ResourceT]) -> list[ResourceT]:
     """Read a list of objects, bare or wrapped in a ListResponse."""
-    if isinstance(payload, dict):
-        list_response: ListResponse[ResourceT] = cast(Any, ListResponse)[
-            model
-        ].model_validate(payload)
-        return list_response.resources or []
-    if not isinstance(payload, list):
+    if isinstance(payload, list):
+        return [model.model_validate(item) for item in payload]
+    schemas = payload.get("schemas") if isinstance(payload, dict) else None
+    if not isinstance(schemas, list) or LIST_RESPONSE_SCHEMA not in schemas:
         raise ValueError("Expected a list of objects, or a ListResponse.")
-    return [model.model_validate(item) for item in payload]
+    list_response: ListResponse[ResourceT] = cast(Any, ListResponse)[
+        model
+    ].model_validate(payload)
+    return list_response.resources or []
 
 
 def describe_server(
@@ -54,25 +71,35 @@ def describe_server(
     resource_types_fd: IO[str] | None,
     service_provider_config_fd: IO[str] | None,
 ) -> ScimProvider:
-    """Describe the server with the configuration files, and query it for the others."""
+    """Describe the server with the configuration files, and query it for the others.
+
+    The files are read before any request, so an invalid file is reported even
+    when the server cannot be reached.
+    """
     resource_types = (
         load_file(resource_types_fd, partial(load_objects, model=ResourceType))
         if resource_types_fd
-        else cast(
-            "ListResponse[ResourceType]", scim_client.query(ResourceType)
-        ).resources
-        or []
+        else None
     )
     schemas = (
         load_file(schemas_fd, partial(load_objects, model=Schema))
         if schemas_fd
-        else cast("ListResponse[Schema]", scim_client.query(Schema)).resources or []
+        else None
     )
     config = (
         load_file(service_provider_config_fd, ServiceProviderConfig.model_validate)
         if service_provider_config_fd
-        else cast(ServiceProviderConfig, scim_client.query(ServiceProviderConfig))
+        else None
     )
+    if resource_types is None:
+        response = cast("ListResponse[ResourceType]", scim_client.query(ResourceType))
+        resource_types = response.resources or []
+    if schemas is None:
+        schemas = (
+            cast("ListResponse[Schema]", scim_client.query(Schema)).resources or []
+        )
+    if config is None:
+        config = cast(ServiceProviderConfig, scim_client.query(ServiceProviderConfig))
     return ScimProvider.from_discovery(schemas, resource_types, config)
 
 

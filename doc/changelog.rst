@@ -13,7 +13,7 @@ Changed
 Fixed
 ^^^^^
 - An invalid ``--schemas``, ``--resource-types`` or ``--service-provider-config`` file gives an error
-  that names the file, instead of a traceback.
+  with the file path, instead of a traceback.
 
 [0.8.0] - 2026-11-17
 --------------------

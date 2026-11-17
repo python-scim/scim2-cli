@@ -545,10 +545,17 @@ def test_server_is_discovered_once(runner, httpserver, simple_user_payload):
         pytest.param("{not json", id="invalid-json"),
         pytest.param("42", id="not-an-object"),
         pytest.param('{"schemas": 42}', id="invalid-object"),
+        pytest.param('[{"schemas": 42}]', id="invalid-item"),
+        pytest.param(
+            '{"schemas": ["urn:ietf:params:scim:api:messages:2.0:ListResponse"],'
+            ' "Resources": [{"schemas": 42}]}',
+            id="invalid-list-response-item",
+        ),
+        pytest.param("[" * 100_000, id="deeply-nested"),
     ],
 )
 def test_invalid_configuration_file(runner, httpserver, tmp_path, option, content):
-    """A configuration file that cannot be read gives an error naming the file."""
+    """A configuration file that cannot be read gives an error with the file path."""
     path = tmp_path / "configuration.json"
     path.write_text(content)
 
@@ -560,3 +567,64 @@ def test_invalid_configuration_file(runner, httpserver, tmp_path, option, conten
 
     assert result.exit_code == 1, result.output
     assert f"Error: Invalid file {path}." in result.output
+
+
+def test_invalid_configuration_file_without_server(runner, tmp_path):
+    """An invalid configuration file is reported before the server is queried."""
+    path = tmp_path / "configuration.json"
+    path.write_text("{not json")
+
+    result = runner.invoke(
+        cli,
+        [
+            "--url",
+            "http://scim.invalid",
+            "--service-provider-config",
+            str(path),
+            "query",
+        ],
+        catch_exceptions=False,
+    )
+
+    assert result.exit_code == 1, result.output
+    assert f"Error: Invalid file {path}." in result.output
+
+
+def test_invalid_configuration_file_shows_the_invalid_fields(
+    runner, httpserver, tmp_path
+):
+    """The error lists the invalid fields of the file, without links to the pydantic documentation."""
+    path = tmp_path / "configuration.json"
+    path.write_text('[{"schemas": 42}]')
+
+    result = runner.invoke(
+        cli,
+        ["--url", httpserver.url_for("/"), "--schemas", str(path), "query"],
+        catch_exceptions=False,
+    )
+
+    assert "schemas: Input should be a valid list" in result.output
+    assert "errors.pydantic.dev" not in result.output
+
+
+@pytest.mark.parametrize("option", ["--schemas", "--resource-types"])
+@pytest.mark.parametrize(
+    "content",
+    [
+        pytest.param("{}", id="empty-object"),
+        pytest.param('{"schemas": ["urn:example:Thing"]}', id="single-object"),
+    ],
+)
+def test_list_file_needs_a_list(runner, httpserver, tmp_path, option, content):
+    """The schemas and resource types files hold a list, or a ListResponse."""
+    path = tmp_path / "configuration.json"
+    path.write_text(content)
+
+    result = runner.invoke(
+        cli,
+        ["--url", httpserver.url_for("/"), option, str(path), "query"],
+        catch_exceptions=False,
+    )
+
+    assert result.exit_code == 1, result.output
+    assert "Expected a list of objects, or a ListResponse." in result.output

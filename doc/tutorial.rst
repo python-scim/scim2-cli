@@ -249,10 +249,14 @@ See the :doc:`scim2-tester documentation <scim2_tester:index>` for more details 
     Performing a SCIM compliance check on http://localhost:8080 ...
     300 passed (seed 2416347125)
 
-The command only shows the results that warn or fail, with their reasons.
-The last line counts the results that passed, warned, failed and were skipped.
 The command fails with the exit code 1 when a check fails.
 With ``--strict``, it also fails on deviations.
+
+Read the results
+~~~~~~~~~~~~~~~~
+
+The command only shows the results that warn or fail, with their reasons.
+The last line counts the results that passed, warned, failed and were skipped.
 
 ``-v`` shows every result with its reason, and ``-vv`` also shows the data of the results,
 such as the responses of the server.
@@ -276,6 +280,9 @@ Each result shows the status of the check, its title, and the resource type and 
 The passing results are green, the deviations from the recommendations of the RFCs are yellow,
 the failures are red and the skipped checks are gray.
 
+Replay a run
+~~~~~~~~~~~~
+
 The checks send generated values, such as user names and email addresses.
 Each run generates new values, and prints its seed in the summary at the end.
 To send the same values again, for instance to replay a failure, pass the seed with ``--seed``:
@@ -283,6 +290,52 @@ To send the same values again, for instance to replay a failure, pass the seed w
 .. code-block:: console
 
     $ scim test --seed 2416347125
+
+Select the checks
+~~~~~~~~~~~~~~~~~
+
+To run only some of the checks, pass their tags with ``--include-tags``.
+To skip some checks, pass their tags with ``--exclude-tags``.
+Both options can be repeated.
+A tag also selects the tags below it: ``crud`` selects ``crud:read`` and ``crud:read:attributes``.
+``scim test --help`` lists the available tags.
+
+.. code-block:: console
+
+    $ scim test --include-tags crud --exclude-tags crud:delete
+
+Get the results as JSON
+~~~~~~~~~~~~~~~~~~~~~~~
+
+With ``--format jsonl``, the command prints one JSON object per line for each result,
+including the results that pass and the skipped checks.
+The objects do not hold the description and the data of the results, and ``-v`` has no effect.
+The header and the summary go to stderr.
+
+.. code-block:: console
+
+    $ scim test --format jsonl --seed 2416347125
+    Performing a SCIM compliance check on http://localhost:8080 ...
+    {"id": "service_provider_config_endpoint", "title": "service_provider_config_endpoint", "resource_type": null, "attribute": null, "status": "SUCCESS", "outcome": "PASSED", "reason": null, "tags": ["discovery", "service-provider-config"]}
+    ...
+    {"id": "check_replace_attribute[User][displayName]", "title": "check_replace_attribute", "resource_type": "User", "attribute": "displayName", "status": "SUCCESS", "outcome": "PASSED", "reason": "Successfully replaced attribute 'displayName'", "tags": ["patch:replace"]}
+    ...
+    300 passed (seed 2416347125)
+
+Track the checks that pass
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``id`` of a result is stable across versions of scim2-tester.
+For instance, a CI job on a server that does not comply yet can keep the list of the ``id`` that pass,
+and fail when one of them does not pass anymore.
+In this example, ``expected.txt`` is a ``passing.txt`` file from a previous run with the same options:
+
+.. code-block:: console
+
+    $ scim test --format jsonl --seed 1 > results.jsonl || true
+    $ jq -r 'select(.outcome == "PASSED") | .id' results.jsonl | sort > passing.txt
+    $ comm -23 expected.txt passing.txt > regressions.txt
+    $ test ! -s regressions.txt
 
 Errors
 ------

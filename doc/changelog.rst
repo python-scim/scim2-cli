@@ -1,6 +1,14 @@
 Changelog
 =========
 
+[Unreleased]
+------------
+
+Added
+^^^^^
+- ``test --format jsonl`` prints one JSON object per result, with a stable ``id``.
+- ``test --include-tags`` and ``test --exclude-tags`` select the checks to run.
+
 [0.7.1] - 2026-10-30
 --------------------
 

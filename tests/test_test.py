@@ -1,3 +1,4 @@
+import json
 from unittest.mock import patch
 
 import click
@@ -112,7 +113,7 @@ def test_response_checks_options(runner, httpserver, options, expected):
     """Test that the response check options are applied on the client."""
     checked = {}
 
-    def iter_check_server(client, seed):
+    def iter_check_server(client, seed, **kwargs):
         checked["status_codes"] = client.check_response_status_codes
         checked["content_type"] = client.check_response_content_type
         return []
@@ -265,7 +266,7 @@ def test_seed_must_be_an_integer(runner, httpserver):
 def test_header_is_printed_before_the_checks(runner, httpserver):
     """The header is printed before the checks run."""
 
-    def iter_check_server(client, seed):
+    def iter_check_server(client, seed, **kwargs):
         click.echo("checks running")
         return []
 
@@ -283,7 +284,7 @@ def test_header_is_printed_before_the_checks(runner, httpserver):
 def test_results_are_printed_as_soon_as_they_arrive(runner, httpserver):
     """Each result is printed before the next check runs."""
 
-    def iter_check_server(client, seed):
+    def iter_check_server(client, seed, **kwargs):
         yield CheckResult(status=Status.ERROR, title="test1")
         click.echo("next check running")
         yield CheckResult(status=Status.ERROR, title="test2")
@@ -344,3 +345,149 @@ def test_summary_color_follows_the_run(runner, httpserver, statuses, options, co
     result = run_checks(runner, httpserver, results, *options, color=True)
 
     assert result.output.splitlines()[-1].startswith(color)
+
+
+def test_jsonl_prints_every_result_as_json(runner, httpserver):
+    """With --format jsonl, stdout holds one JSON object per result, passing and skipped results included."""
+    results = [
+        CheckResult(
+            status=Status.SUCCESS,
+            title="check_add_attribute",
+            resource_type="User",
+            attribute="name.givenName",
+            reason="reason1",
+            data="data1",
+            tags={"patch:add", "patch"},
+        ),
+        CheckResult(status=Status.SKIPPED, title="random_url"),
+    ]
+
+    result = run_checks(runner, httpserver, results, "--format", "jsonl")
+
+    assert [json.loads(line) for line in result.stdout.splitlines()] == [
+        {
+            "id": "check_add_attribute[User][name.givenName]",
+            "title": "check_add_attribute",
+            "resource_type": "User",
+            "attribute": "name.givenName",
+            "status": "SUCCESS",
+            "outcome": "PASSED",
+            "reason": "reason1",
+            "tags": ["patch", "patch:add"],
+        },
+        {
+            "id": "random_url",
+            "title": "random_url",
+            "resource_type": None,
+            "attribute": None,
+            "status": "SKIPPED",
+            "outcome": "SKIPPED",
+            "reason": None,
+            "tags": [],
+        },
+    ]
+
+
+def test_jsonl_prints_the_header_and_the_summary_on_stderr(runner, httpserver):
+    """With --format jsonl, the header and the summary go to stderr."""
+    results = [CheckResult(status=Status.SUCCESS, title="check")]
+
+    result = run_checks(
+        runner, httpserver, results, "--format", "jsonl", "--seed", "1234"
+    )
+
+    assert result.stderr.splitlines() == [
+        f"Performing a SCIM compliance check on {httpserver.url_for('/')} ...",
+        "1 passed (seed 1234)",
+    ]
+
+
+@pytest.mark.parametrize(
+    ("status", "options", "exit_code"),
+    [
+        (Status.SUCCESS, [], 0),
+        (Status.ERROR, [], 1),
+        (Status.DEVIATION, [], 0),
+        (Status.DEVIATION, ["--strict"], 1),
+    ],
+)
+def test_jsonl_keeps_the_exit_code(runner, httpserver, status, options, exit_code):
+    """With --format jsonl, the command fails on the same results as with text."""
+    results = [CheckResult(status=status, title="check")]
+
+    result = run_checks(runner, httpserver, results, "--format", "jsonl", *options)
+
+    assert result.exit_code == exit_code, result.output
+
+
+def test_jsonl_escapes_control_characters(runner, httpserver):
+    """The JSON output holds no raw control character from the server."""
+    results = [
+        CheckResult(status=Status.ERROR, title="check", reason="\x1b[31mred\x9b")
+    ]
+
+    result = run_checks(runner, httpserver, results, "--format", "jsonl")
+
+    assert "\x1b" not in result.stdout
+    assert "\x9b" not in result.stdout
+    assert json.loads(result.stdout)["reason"] == "\x1b[31mred\x9b"
+
+
+@pytest.mark.parametrize(
+    ("options", "include_tags", "exclude_tags"),
+    [
+        pytest.param([], None, None, id="no-tags"),
+        pytest.param(
+            ["--include-tags", "crud", "--include-tags", "patch:add"],
+            {"crud", "patch:add"},
+            None,
+            id="include",
+        ),
+        pytest.param(
+            ["--exclude-tags", "crud:delete"],
+            None,
+            {"crud:delete"},
+            id="exclude",
+        ),
+    ],
+)
+def test_tags_select_the_checks(
+    runner, httpserver, options, include_tags, exclude_tags
+):
+    """--include-tags and --exclude-tags are passed to scim2-tester."""
+    with patch(
+        "scim2_cli.test.iter_check_server", return_value=[]
+    ) as iter_check_server:
+        result = runner.invoke(
+            cli,
+            ["--url", httpserver.url_for("/"), "test", *options],
+            catch_exceptions=False,
+        )
+
+    assert result.exit_code == 0, result.output
+    assert iter_check_server.call_args.kwargs["include_tags"] == include_tags
+    assert iter_check_server.call_args.kwargs["exclude_tags"] == exclude_tags
+
+
+@pytest.mark.parametrize("option", ["--include-tags", "--exclude-tags"])
+def test_unknown_tag_is_a_usage_error(runner, httpserver, option):
+    """A tag that selects no check is a usage error."""
+    with patch("scim2_cli.test.iter_check_server") as iter_check_server:
+        result = runner.invoke(
+            cli, ["--url", httpserver.url_for("/"), "test", option, "unknown"]
+        )
+
+    assert result.exit_code == 2
+    assert "'unknown' is not one of" in result.output
+    iter_check_server.assert_not_called()
+
+
+def test_unknown_format_is_a_usage_error(runner, httpserver):
+    """A format other than text and jsonl is a usage error."""
+    with patch("scim2_cli.test.iter_check_server") as iter_check_server:
+        result = runner.invoke(
+            cli, ["--url", httpserver.url_for("/"), "test", "--format", "xml"]
+        )
+
+    assert result.exit_code == 2
+    iter_check_server.assert_not_called()
